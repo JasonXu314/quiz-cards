@@ -1,5 +1,5 @@
 const fs = require('fs');
-console.log(fs.readdirSync(`${process.cwd()}/.next/serverless/pages`));
+console.log(fs.readdirSync(`${process.cwd()}/.next/serverless/pages/api`));
 
 const folders = fs.readdirSync(`${process.cwd()}/.next/serverless/pages`);
 
