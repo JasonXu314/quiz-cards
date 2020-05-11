@@ -2,6 +2,7 @@ import { MongoClient } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
+	console.log(process.env);
 	const dbURL = process.env.NODE_ENV === 'development' ? 'mongodb://localhost:27017' : `mongodb+srv://Me:${process.env.MONGODB_PASSWORD}@quiz-cards-cluster-hwc6f.mongodb.net/test`;
 	try {
 		const client = await MongoClient.connect(dbURL, { useUnifiedTopology: true });
