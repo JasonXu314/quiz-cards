@@ -2,7 +2,7 @@ import fs from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-	console.log(process.env.NODE_ENV);
+	console.log(fs.readdirSync('/'));
 	const jsonPath = process.env.NODE_ENV === 'development' ? './cards.json' : '/cards.json';
 	const cards: Cards = JSON.parse(fs.readFileSync(jsonPath).toString());
 	
