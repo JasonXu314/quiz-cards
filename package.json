@@ -25,7 +25,8 @@
     "dev": "next -p 5000",
     "build": "next build",
     "start": "next start",
-    "test": "jest"
+    "test": "jest",
+    "postbuild": "cp cards.json ./api"
   },
   "keywords": [],
   "author": "",

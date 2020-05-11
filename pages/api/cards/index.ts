@@ -2,8 +2,7 @@ import fs from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-	const filePath = process.env.NODE_ENV === 'development' ? './pages/api/cards/cards.json' : './cards.json';
-	const cards: Cards = JSON.parse(fs.readFileSync(filePath).toString());
+	const cards: Cards = JSON.parse(fs.readFileSync('./cards.json').toString());
 	
 	switch (req.method) {
 		case ('POST'):
