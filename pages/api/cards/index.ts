@@ -1,9 +1,9 @@
-import axios from 'axios';
+import fs from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-	const url = process.env.NODE_ENV === 'development' ? 'http://localhost:5000/cards.json' : 'https://quiz-cards.now.sh/cards.json';
-	const cards: Cards = (await axios(url)).data;
+	const filePath = process.env.NODE_ENV === 'development' ? './pages/api/cards/cards.json' : './cards.json';
+	const cards: Cards = JSON.parse(fs.readFileSync(filePath).toString());
 	
 	switch (req.method) {
 		case ('POST'):
