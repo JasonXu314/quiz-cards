@@ -1,5 +1,5 @@
 const fs = require('fs');
-console.log(fs.readdirSync(process.cws()));
+console.log(fs.readdirSync(process.cwd()));
 
 const folders = fs.readdirSync('./.next/server/static');
 
