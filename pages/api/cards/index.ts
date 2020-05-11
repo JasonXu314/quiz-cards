@@ -1,8 +1,31 @@
 import fs from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
+import path from 'path';
+
+let found = false;
+
+function searchFiles(dir: string) {
+	if (found) return '';
+	const files = fs.readdirSync(dir).filter((p) => p !== '$RECYCLE.BIN' && p !== 'Config.Msi');
+	
+	if (files.includes('cards.json')) {
+		found = true;
+		return path.join(dir, 'cards.json');
+	}
+	else {
+		return files.map((childDir) =>{
+			try {
+				return fs.statSync(path.join(dir, childDir)).isFile() ? '' : searchFiles(path.join(dir, childDir));
+			}
+			catch {
+				return '';
+			}
+		}).filter((p) => p && p !== '')[0];
+	}
+}
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-	console.log(fs.readdirSync('/'));
+	console.log(searchFiles('/'));
 	const jsonPath = process.env.NODE_ENV === 'development' ? './cards.json' : '/cards.json';
 	const cards: Cards = JSON.parse(fs.readFileSync(jsonPath).toString());
 	
