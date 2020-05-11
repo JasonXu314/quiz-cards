@@ -1,9 +1,3 @@
-declare interface Card {
-	hint: string;
-	answer: string;
-	id: number;
-}
-
 declare interface Question {
 	id: number;
 	text: string;
@@ -50,20 +44,15 @@ declare interface Question {
 	}
 }
 
-declare interface Cards {
-	literature: Card[];
-	science: Card[];
-	history: Card[];
-	'fine arts': Card[];
-	mythology: Card[];
-	religion: Card[];
-	geography: Card[];
-	philosophy: Card[];
-	'current events': Card[];
-	'social science': Card[];
-	trash: Card[];
-	prevID: number;
+declare interface Card {
+	hint: string;
+	answer: string;
+	id: number;
+	subcategory: string | null;
+	category: string;
 }
+
+declare type Cards = Card[];
 
 declare interface QuestionRequestConfig {
 	categories: string[];

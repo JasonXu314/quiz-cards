@@ -1,8 +1,10 @@
 import fs from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
+import path from 'path';
+import { cwd } from 'process';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-	const cards: Cards = JSON.parse(fs.readFileSync('./cards.json').toString());
+	const cards: Cards = JSON.parse(fs.readFileSync(path.join(cwd(), 'cards.json')).toString());
 	
 	switch (req.method) {
 		case ('POST'):
@@ -15,17 +17,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			const categories = [];
 
 			if (typeof req.query.categories === 'string') {
-				categories.push(...req.query.categories.split(/,\s?/).map((category) => category.toLowerCase()));
+				categories.push(...req.query.categories.split(/,\s?/));
 			}
 			else {
 				res.status(400).json('Categories should be a single string of comma-separated categories');
 			}
 			
-			const response: Card[] = [];
-
-			categories.forEach((category) => {
-				response.push(...cards[category]);
-			});
+			const response: Card[] = cards.filter((card) => categories.includes(card.category));
 
 			res.status(200).json(response);
 			return;

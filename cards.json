@@ -1,29 +1,23 @@
-{
-	"literature": [{
-		"id": 1,
+[
+	{
 		"hint": "lit",
 		"answer": "ans",
-		"subcategory": "Literature American"
-	}, {
+		"id": 1,
+		"subcategory":"Literature American",
+		"category": "Literature"
+	},
+	{
+		"hint": "lit2",
+		"answer": "ans2",
 		"id": 2,
-		"hint": "lit 2",
-		"answer": "ans 2",
-		"subcategory": "Literature World"
-	}],
-	"science": [{
-		"id": 3,
+		"subcategory": null,
+		"category": "Literature"
+	},
+	{
 		"hint": "sci",
-		"answer": "ans",
-		"subcategory": "Science Computer Science"
-	}],
-	"history": [],
-	"fine arts": [],
-	"mythology": [],
-	"religion": [],
-	"geography": [],
-	"philosophy": [],
-	"current events": [],
-	"social science": [],
-	"trash": [],
-	"prevID": 3
-}
+		"answer": "treez",
+		"id": 3,
+		"subcategory": "Science Computer Science",
+		"category": "Science"
+	}
+]

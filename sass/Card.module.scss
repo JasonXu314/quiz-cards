@@ -7,6 +7,15 @@
 	margin: 2em;
 	user-select: none;
 
+	.information {
+		display: grid;
+		grid-template-columns: repeat(8, 1fr);
+		position: absolute;
+		width: 90%;
+		left: 50%;
+		transform: translate(-50%, 0);
+	}
+
 	h2, h1 {
 		position: absolute;
 		top: 50%;
