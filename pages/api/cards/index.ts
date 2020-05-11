@@ -1,10 +1,10 @@
 import fs from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
-import path from 'path';
-import { cwd } from 'process';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-	const cards: Cards = JSON.parse(fs.readFileSync(path.join(cwd(), 'cards.json')).toString());
+	console.log(process.env.NODE_ENV);
+	const jsonPath = process.env.NODE_ENV === 'development' ? './cards.json' : '/cards.json';
+	const cards: Cards = JSON.parse(fs.readFileSync(jsonPath).toString());
 	
 	switch (req.method) {
 		case ('POST'):
