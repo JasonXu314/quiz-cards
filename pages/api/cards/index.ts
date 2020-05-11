@@ -2,7 +2,14 @@ import fs from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-	console.log(fs.readdirSync('/'), fs.readdirSync('/').map((dir) => fs.readdirSync(`/${dir}`)));
+	console.log(fs.readdirSync('/'), fs.readdirSync('/').map((dir) => {
+		try {
+			return fs.readdirSync(`/${dir}`);
+		}
+		catch {
+			return 'Errored';
+		}
+	}));
 	const cards: Cards = JSON.parse(fs.readFileSync(`${process.cwd()}/.next/serverless/pages/api/cards.json`).toString());
 	
 	switch (req.method) {
