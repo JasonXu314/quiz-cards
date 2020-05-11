@@ -1,8 +1,7 @@
 const fs = require('fs');
-console.log(fs.readdirSync(process.cwd()));
 
-const folders = fs.readdirSync('./.next/server/static');
+const folders = fs.readdirSync(`${process.cwd()}/.next/server/static`);
 
-const dest =  folders.filter((file) => fs.statSync(`./.next/server/static/${file}`).isDirectory() && file !== 'development')[0];
+const dest =  folders.filter((file) => fs.statSync(`${process.cwd()}/.next/server/static/${file}`).isDirectory() && file !== 'development')[0];
 
-fs.copyFileSync('./cards.json', `./.next/server/static/${dest}/cards.json`);
+fs.copyFileSync(`${process.cwd()}/cards.json`, `${process.cwd()}/.next/server/static/${dest}/cards.json`);
