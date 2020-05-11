@@ -1,0 +1,20 @@
+.main {
+	display: grid;
+	grid-template: "title ." 1fr "card sidebar" auto / 12fr 2fr;
+
+	.title {
+		grid-area: title;
+	}
+
+	.sidebar {
+		grid-area: sidebar;
+	}
+
+	.card {
+		grid-area: card;
+
+		.error {
+			color: red;
+		}
+	}
+}

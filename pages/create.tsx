@@ -1,17 +1,23 @@
+import axios from 'axios';
 import { NextPage } from "next";
 import { useState } from "react";
+import styles from '../sass/Create.module.scss';
 import { categories, categoryTags, catToSubcat, catToTags } from '../util/constants';
 
 const Create: NextPage<{}> = () => {
 	const [category, setCategory] = useState<string>('Literature');
 	const [subcategory, setSubcategory] = useState<string>('');
+	const [hint, setHint] = useState<string>('');
+	const [answer, setAnswer] = useState<string>('');
+	const [response, setResponse] = useState(null);
+	const [error, setError] = useState(null);
 	
 	return (
-		<div id = "main">
-			<div id = "title">
+		<div className = {styles.main}>
+			<div className = {styles.title}>
 				QuizCards
 			</div>
-			<div id = "sidebar">
+			<div className = {styles.sidebar}>
 				<h4>Category:</h4>
 				<select onChange = {(evt) => {
 					setCategory(evt.target.value);
@@ -25,21 +31,41 @@ const Create: NextPage<{}> = () => {
 					{catToSubcat[category].map((subcat: string, i: number) => <option key = {catToTags[category][i]} value = {subcat}>{subcat}</option>)}
 				</select>
 			</div>
-
-			<style jsx>{`
-				div#main {
-					display: grid;
-					grid-template: "title ." 1fr "card sidebar" auto / 12fr 2fr;
+			<form className = {styles.card} onSubmit = {(evt) => {
+				evt.preventDefault();
+				if (hint === '' && answer === '') {
+					setError('Hint and Answer are required');
 				}
-
-				div#main div#title {
-					grid-area: title;
+				else if (hint === '') {
+					setError('Hint is required');
 				}
-
-				div#main div#sidebar {
-					grid-area: sidebar;
+				else if (answer === '') {
+					setError('Answer is required');
 				}
-			`}</style>
+				else {
+					axios.post('/api/cards', {
+						category,
+						subcategory,
+						hint,
+						answer
+					}).then((res) => setResponse(res.data)).catch((err) => setError(err.response?.data));
+					setCategory('Literature');
+					setSubcategory('');
+					setHint('');
+					setAnswer('');
+					setError(null);
+				}
+			}}>
+				<h4>Hint:</h4>
+				<input onChange = {(evt) => setHint(evt.target.value)} value = {hint} />
+				<h4>Answer:</h4>
+				<input onChange = {(evt) => setAnswer(evt.target.value)} value = {answer} />
+				<div>
+					<button type = "submit">Create!</button>
+				</div>
+				{response && <div>{response}</div>}
+				{error && <div className = {styles.error}>{error}</div>}
+			</form>
 		</div>
 	);
 };

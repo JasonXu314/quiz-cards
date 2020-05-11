@@ -47,9 +47,9 @@ declare interface Question {
 declare interface Card {
 	hint: string;
 	answer: string;
-	id: number;
 	subcategory: string | null;
 	category: string;
+	_id: string;
 }
 
 declare type Cards = Card[];

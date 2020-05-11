@@ -113,20 +113,33 @@ const Index: NextPage<{}> = () => {
 						setAnswering(true);
 					}} disabled = {mode === 'card'}>Buzz!</button>
 					<button onClick = {() => {
+						if (cardIndex === 0) {
+							setCardIndex(cards.length - 1);
+						}
+						else {
+							setCardIndex(cardIndex - 1);
+						}
+					}} disabled = {mode === 'read'}>&lt; Back</button>
+					<button onClick = {() => {
 						setActive(true);
 						if (mode === 'read') {
 							setQuestionFinished(false);
 							setQuestionIndex(questionIndex + 1);
 						}
 						else {
-							setCardIndex(cardIndex + 1);
+							if (cardIndex === cards.length - 1) {
+								setCardIndex(0);
+							}
+							else {
+								setCardIndex(cardIndex + 1);
+							}
 						}
 					}} disabled = {mode === 'read' && active}>Next &gt;</button>
 				</div>
 				{mode === 'read' ?
 					(questions.length > 0 && <QuestionReader question = {questions[questionIndex]} speed = {speed} setActive = {setActive} active = {active}
 						questionFinished = {questionFinished} correct = {correct} />) : 
-					(cards.length > 0 && <Card card = {cards[cardIndex]} key = {cards[cardIndex].id} />)}
+					(cards.length > 0 && <Card card = {cards[cardIndex]} key = {cards[cardIndex]._id} />)}
 				{answering && <AnswerBox onChange = {(evt) => setUserAnswer(evt.target.value)}  value = {userAnswer} onSubmit = {(evt) => {
 					evt.preventDefault();
 					setAnswering(false);
