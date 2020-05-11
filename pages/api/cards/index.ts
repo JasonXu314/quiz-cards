@@ -2,8 +2,8 @@ import fs from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-	const cards: Cards = JSON.parse(fs.readFileSync('./cards.json').toString());
 	console.log(process.cwd());
+	const cards: Cards = JSON.parse(fs.readFileSync('./cards.json').toString());
 	
 	switch (req.method) {
 		case ('POST'):
