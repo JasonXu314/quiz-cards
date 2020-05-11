@@ -1,9 +1,9 @@
-import fs from 'fs';
+import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-	const jsonPath = process.env.NODE_ENV === 'development' ? './cards.json' : '/cards.json';
-	const cards: Cards = JSON.parse(fs.readFileSync(jsonPath).toString());
+	const url = process.env.NODE_ENV === 'development' ? 'http://localhost:5000/cards.json' : 'https://quiz-cards.now.sh/cards.json';
+	const cards: Cards = (await axios(url)).data;
 	
 	switch (req.method) {
 		case ('POST'):
@@ -12,6 +12,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 		case ('GET'):
 			if (!req.query.categories) {
 				res.status(400).json('Must have category');
+				return;
 			}
 			const categories = [];
 
@@ -20,6 +21,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			}
 			else {
 				res.status(400).json('Categories should be a single string of comma-separated categories');
+				return;
 			}
 			
 			const response: Card[] = cards.filter((card) => categories.includes(card.category));
