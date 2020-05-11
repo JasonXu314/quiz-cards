@@ -1,0 +1,29 @@
+{
+	"literature": [{
+		"id": 1,
+		"hint": "lit",
+		"answer": "ans",
+		"subcategory": "Literature American"
+	}, {
+		"id": 2,
+		"hint": "lit 2",
+		"answer": "ans 2",
+		"subcategory": "Literature World"
+	}],
+	"science": [{
+		"id": 3,
+		"hint": "sci",
+		"answer": "ans",
+		"subcategory": "Science Computer Science"
+	}],
+	"history": [],
+	"fine arts": [],
+	"mythology": [],
+	"religion": [],
+	"geography": [],
+	"philosophy": [],
+	"current events": [],
+	"social science": [],
+	"trash": [],
+	"prevID": 3
+}

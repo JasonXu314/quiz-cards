@@ -1,0 +1,17 @@
+.main {
+	div {
+		margin: 0.5em;
+	}
+
+	.correct {
+		color: green;
+	}
+
+	.incorrect {
+		color: red;
+	}
+
+	.correct, .incorrect {
+		font-weight: bold;
+	}
+}

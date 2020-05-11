@@ -1,0 +1,16 @@
+.main {
+	text-align: center;
+	height: 25em;
+	border: 1px solid black;
+	border-radius: 40px;
+	position: relative;
+	margin: 2em;
+	user-select: none;
+
+	h2, h1 {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+}

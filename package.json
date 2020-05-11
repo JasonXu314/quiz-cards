@@ -1,0 +1,36 @@
+{
+  "name": "quiz-cards",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "next": "^9.3.6",
+    "qs": "^6.9.4",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "sass": "^1.26.5"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.2.1",
+    "@types/node": "^13.13.5",
+    "@types/qs": "^6.9.2",
+    "@types/react": "^16.9.34",
+    "jest": "^25.5.0",
+    "react-test-render": "^1.1.2",
+    "ts-jest": "^25.5.0",
+    "typescript": "^3.8.3"
+  },
+  "scripts": {
+    "dev": "next -p 5000",
+    "build": "next build",
+    "start": "next start",
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "jest": {
+    "preset": "ts-jest"
+  }
+}
