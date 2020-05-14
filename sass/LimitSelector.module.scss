@@ -1,6 +1,49 @@
 .main {
-	input, label {
+	.limit {
 		width: 5em;
 		margin: 0.2em;
+	}
+
+	.switch {
+		width: 40px;
+		height: 20px;
+		border-radius: 10px;
+		position: relative;
+		display: inline-block;
+		background: #CCCCCC;
+		margin-left: 0.3em;
+		transition: background 0.2s;
+
+		&.checked {
+			background: #2196F3;
+		}
+
+		input[type=checkbox] {
+			opacity: 0;
+			height: 0;
+			width: 0;
+		}
+
+		span {
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+
+		input:checked + span::before {
+			transform: translate(20px);
+		}
+		
+		span::before {
+			content: "";
+			height: 16px;
+			width: 16px;
+			border-radius: 50%;
+			background: white;
+			position: absolute;
+			left: 2px;
+			top: 2px;
+			transition: transform 0.3s;
+		}
 	}
 }

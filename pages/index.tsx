@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Link from 'next/link';
 import { NextPage } from 'next/types';
 import { useReducer, useState } from 'react';
 import AnswerBox from '../components/AnswerBox';
@@ -32,6 +33,7 @@ const Index: NextPage<{}> = () => {
 	const [questionFinished, setQuestionFinished] = useState<boolean>(false);
 	const [correct, setCorrect] = useState<boolean>(false);
 	const [difficulty, setDifficulty] = useState<number>(3);
+	const [useLimit, setUseLimit] = useState<boolean>(false);
 
 	return (
 		<div id = "main">
@@ -56,9 +58,9 @@ const Index: NextPage<{}> = () => {
 					<ModeSelection mode = {mode} setMode = {setMode} />
 					<SubcategorySelection dispatch = {subcategoryDispatch} categories = {categories} subcategories = {subcategories} />
 					<hr id = "separator" />
-					<LimitSelector setLimit = {setLimit} limit = {limit} />
-					<SpeedSelector setSpeed = {setSpeed} speed = {speed} />
-					<div>
+					<LimitSelector setLimit = {setLimit} limit = {limit} mode = {mode} useLimit = {useLimit} setUseLimit = {setUseLimit} />
+					{mode === 'read' && <SpeedSelector setSpeed = {setSpeed} speed = {speed} />}
+					{mode === 'read' && <div>
 						<div>Difficulty:</div>
 						<select onChange = {(evt) => setDifficulty(parseInt(evt.target.value))} value = {difficulty}>
 							<option value = {1}>1 (Middle School)</option>
@@ -71,8 +73,17 @@ const Index: NextPage<{}> = () => {
 							<option value = {8}>8 (Hard College)</option>
 							<option value = {9}>9 (Open)</option>
 						</select>
-					</div>
+					</div>}
 				</form>
+				<div>
+					<Link href = "/create"><a rel = "noopener noreferrer">Create new cards</a></Link>
+				</div>
+				<div>
+					<Link href = "/import"><a rel = "noopener noreferrer">Import anki cards</a></Link>
+				</div>
+				<div>
+					<Link href = "/edit"><a rel = "noopener noreferrer">Edit existing cards</a></Link>
+				</div>
 			</div>
 
 			<div id = "content">
@@ -97,7 +108,9 @@ const Index: NextPage<{}> = () => {
 								break;
 							case ('card'):
 								axios(compileCardRequest('/api/cards', {
-									categories
+									categories,
+									subcategories,
+									limit: useLimit ? limit : 0
 								}))
 									.then((res) => {
 										setCards(res.data);

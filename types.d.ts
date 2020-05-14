@@ -54,6 +54,13 @@ declare interface Card {
 
 declare type Cards = Card[];
 
+declare interface ProtoCard {
+	hint: string;
+	answer: string;
+	category: string;
+	subcategory: strin | null;
+}
+
 declare interface QuestionRequestConfig {
 	categories: string[];
 	limit: number;
@@ -64,6 +71,13 @@ declare interface QuestionRequestConfig {
 
 declare interface CardRequestConfig {
 	categories: string[];
+	subcategories: string[];
+	limit?: number;
 }
 
 declare type AppMode = 'read' | 'card';
+
+declare type ImportCardReducerAction =
+	{ type: 'SET', cards: ProtoCard[] } |
+	{ type: 'CATEGORY', i: number, category: string } |
+	{ type: 'SUBCATEGORY', i: number, subcategory: string };

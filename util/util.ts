@@ -2,7 +2,7 @@ import qs from 'qs';
 
 export function compileQuestionRequest(options: QuestionRequestConfig) {
 	if (options.internal) {
-		let req = '/api/questions?';
+		const req = '/api/questions?';
 		
 		let categories = '&categories=';
 		options.categories.forEach((category, i) => {
@@ -44,7 +44,7 @@ export function compileQuestionRequest(options: QuestionRequestConfig) {
 }
 
 export function compileCardRequest(root: string, options: CardRequestConfig) {
-	let req = root + '?';
+	const req = root + '?';
 	
 	let categories = 'categories=';
 	options.categories.forEach((category, i) => {
@@ -56,7 +56,19 @@ export function compileCardRequest(root: string, options: CardRequestConfig) {
 		}
 	});
 
-	return req + categories;
+	let subcategories = '&subcategories=';
+	options.subcategories.forEach((subcategory, i) => {
+		if (i === options.subcategories.length - 1) {
+			subcategories += subcategory;
+		}
+		else {
+			subcategories += subcategory + ',';
+		}
+	})
+
+	const limit = options.limit ? `&limit=${options.limit}` : '';
+
+	return req + categories + subcategories + limit ;
 }
 
 export function convertCategory(category: string) {
@@ -65,6 +77,32 @@ export function convertCategory(category: string) {
 
 export function convertSubcategory(subcategory: string) {
 	return subcategoryMap[subcategory];
+}
+
+export async function processCards(text: string, category: string, subcategory: string): Promise<ProtoCard[]> {
+	return new Promise((resolve) => {
+		const raw = text.split(/;?\n/);
+		raw.pop();
+		const cards = raw.map((card) => card.split('\t')).map((pair) => ({
+			category,
+			subcategory,
+			hint: pair[0],
+			answer: cleanCard(pair[1])
+		}));
+		resolve(cards);
+	});
+}
+
+function cleanCard(card: string) {
+	let newCard = card.replace(/"?<pre>Answer:<\/pre> /, '');
+
+	if (newCard.includes('""')) {
+		newCard = newCard.replace(/"$/, '');
+		newCard = newCard.replace(/^"/, '');
+		newCard = newCard.replace(/""/g, '"');
+	}
+	
+	return newCard;
 }
 
 const categoryMap = {

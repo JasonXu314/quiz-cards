@@ -1,0 +1,23 @@
+.main {
+	margin: 1em;
+	border: 2px solid black;
+	padding: 0.5em;
+	display: grid;
+	grid-template: "hint category" "answer subcategory" / 1fr 1fr;
+
+	.hint {
+		grid-area: hint;
+	}
+
+	.category {
+		grid-area: category;
+	}
+
+	.answer {
+		grid-area: answer;
+	}
+
+	.subcategory {
+		grid-area: subcategory;
+	}
+}
