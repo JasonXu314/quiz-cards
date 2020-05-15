@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 interface Props {
 	value: string;
 	onChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
@@ -5,9 +7,15 @@ interface Props {
 }
 
 const AnswerBox: React.FC<Props> = ({ value, onChange, onSubmit }) => {
+	const inputRef = useRef<HTMLInputElement>(null);
+
+	useEffect(() => {
+		inputRef.current.focus();
+	});
+	
 	return (
 		<form onSubmit = {onSubmit}>
-			<input type = "text" onChange = {onChange} value = {value} />
+			<input type = "text" onChange = {onChange} value = {value} ref = {inputRef} />
 		</form>
 	);
 };

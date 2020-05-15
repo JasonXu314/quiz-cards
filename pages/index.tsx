@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Link from 'next/link';
 import { NextPage } from 'next/types';
-import { useReducer, useState } from 'react';
+import { useCallback, useEffect, useReducer, useState } from 'react';
 import AnswerBox from '../components/AnswerBox';
 import Card from '../components/Card';
 import CategorySelection from '../components/CategorySelection';
@@ -35,6 +35,35 @@ const Index: NextPage<{}> = () => {
 	const [difficulty, setDifficulty] = useState<number>(3);
 	const [useLimit, setUseLimit] = useState<boolean>(false);
 
+	const keypressHandler = useCallback((evt: KeyboardEvent) => {
+		switch (evt.code) {
+			case ('Space'):
+				if (active && !answering && !questionFinished) {
+					setActive(false);
+					setAnswering(true);
+				}
+				break;
+			case ('KeyN'):
+				if (!active && !answering && questionFinished) {
+					setActive(true);
+					setAnswering(false);
+					setQuestionFinished(false);
+					setQuestionIndex(questionIndex + 1);
+				}
+				break;
+			default:
+				break;
+		}
+	}, [setActive, setAnswering, setQuestionFinished, setQuestionIndex, active, answering, questionFinished, questionIndex]);
+
+	useEffect(() => {
+		document.addEventListener('keyup', keypressHandler);
+		
+		return () => {
+			document.removeEventListener('keyup', keypressHandler);
+		};
+	}, [keypressHandler]);
+
 	return (
 		<div id = "main">
 			<div id = "title">
@@ -49,6 +78,7 @@ const Index: NextPage<{}> = () => {
 					<progress value = {1} max = "1" />}
 				{answering && <Timer active time = {7500} timeout = {() => {
 					setAnswering(false);
+					setActive(false);
 					setQuestionFinished(true);
 					setCorrect(questions[questionIndex].answer === userAnswer || questions[questionIndex].answer.toLowerCase().includes(userAnswer.toLowerCase()));
 				}} />}

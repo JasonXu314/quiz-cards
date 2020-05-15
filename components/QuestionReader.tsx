@@ -10,7 +10,6 @@ interface Props {
 	correct: boolean;
 }
 
-//								Deeply nested question (question prop = questionObj.text.question)
 const QuestionReader: React.FC<Props> = ({ question, speed, active, questionFinished, correct }) => {
 	const [questionText, setQuestionText] = useState<string>('');
 
@@ -29,7 +28,7 @@ const QuestionReader: React.FC<Props> = ({ question, speed, active, questionFini
 		return () => {
 			clearInterval(intervalID);
 		};
-	}, [speed, active]);
+	}, [speed, active, question]);
 	
 	return (
 		<div className = {styles.main}>

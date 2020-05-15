@@ -1,4 +1,4 @@
-declare interface Question {
+interface Question {
 	id: number;
 	text: string;
 	answer: string;
@@ -44,7 +44,7 @@ declare interface Question {
 	}
 }
 
-declare interface Card {
+interface Card {
 	hint: string;
 	answer: string;
 	subcategory: string | null;
@@ -52,16 +52,14 @@ declare interface Card {
 	_id: string;
 }
 
-declare type Cards = Card[];
-
-declare interface ProtoCard {
+interface ProtoCard {
 	hint: string;
 	answer: string;
 	category: string;
 	subcategory: strin | null;
 }
 
-declare interface QuestionRequestConfig {
+interface QuestionRequestConfig {
 	categories: string[];
 	limit: number;
 	internal: boolean;
@@ -69,15 +67,15 @@ declare interface QuestionRequestConfig {
 	difficulty: number;
 }
 
-declare interface CardRequestConfig {
+interface CardRequestConfig {
 	categories: string[];
 	subcategories: string[];
 	limit?: number;
 }
 
-declare type AppMode = 'read' | 'card';
+type AppMode = 'read' | 'card';
 
-declare type ImportCardReducerAction =
+type ImportCardReducerAction =
 	{ type: 'SET', cards: ProtoCard[] } |
 	{ type: 'CATEGORY', i: number, category: string } |
 	{ type: 'SUBCATEGORY', i: number, subcategory: string };
