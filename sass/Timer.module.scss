@@ -1,0 +1,54 @@
+.outer {
+	background-color: #dddddd;
+	border-radius: 5px;
+	width: 240px;
+	height: 20px;
+	position: relative;
+
+	.inner {
+		position: absolute;
+		top: 0;
+		left: 0;
+		border-radius: 5px;
+		background-color: #149bdf;
+		background-image: linear-gradient(
+			-45deg,
+			rgba(225, 225, 225, 0.15) 0px,
+			rgba(225, 225, 225, 0.15) 15px,
+			transparent 15px,
+			transparent 30px,
+			rgba(225, 225, 225, 0.15) 30px,
+			rgba(225, 225, 225, 0.15) 45px,
+			transparent 45px,
+			transparent 60px,
+			rgba(225, 225, 225, 0.15) 60px,
+			rgba(225, 225, 225, 0.15) 75px,
+			transparent 75px,
+			transparent 90px,
+			rgba(225, 225, 225, 0.15) 90px,
+			rgba(225, 225, 225, 0.15) 105px,
+			transparent 105px,
+			transparent 120px,
+			rgba(225, 225, 225, 0.15) 120px,
+			rgba(225, 225, 225, 0.15) 135px,
+			transparent 135px,
+			transparent 150px,
+			rgba(225, 225, 225, 0.15) 150px,
+			rgba(225, 225, 225, 0.15) 165px,
+			transparent 165px,
+			transparent 180px,
+			rgba(225, 225, 225, 0.15) 180px,
+			rgba(225, 225, 225, 0.15) 195px,
+			transparent 195px,
+			transparent 210px,
+			rgba(225, 225, 225, 0.15) 210px,
+			rgba(225, 225, 225, 0.15) 225px,
+			transparent 225px,
+			transparent 240px
+		);
+	}
+
+	.inner.red {
+		background-color: #ee5f5b !important;
+	}
+}

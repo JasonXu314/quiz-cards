@@ -1,57 +1,45 @@
 import qs from 'qs';
+import { compareTwoStrings } from 'string-similarity';
 
 export function compileQuestionRequest(options: QuestionRequestConfig) {
 	if (options.internal) {
 		const req = '/api/questions?';
-		
+
 		let categories = '&categories=';
-		options.categories.forEach((category, i) => {
-			if (i === options.categories.length - 1) {
-				categories += category;
-			}
-			else {
-				categories += category + ',';
-			}
-		});
+		categories += options.categories.join(',');
 
 		let subcategories = '&subcategories=';
-		options.subcategories.forEach((subcategory, i) => {
-			if (i === options.subcategories.length - 1) {
-				subcategories += subcategory;
-			}
-			else {
-				subcategories += subcategory + ',';
-			}
-		});
-	
+		subcategories += options.subcategories.join(',');
+
 		return req + categories + subcategories + `&limit=${options.limit}` + `&difficulty=${options.difficulty}`;
-	}
-	else {
-		const queryString = qs.stringify({
-			search: { 
-				query: '',
-				filters: {
-					category: options.categories.map(convertCategory),
-					subcategory: options.subcategories.map(convertSubcategory),
-					difficulty: [difficultyMap[options.difficulty]]
-				},
-				limit: true,
-				random: options.limit,
-			}
-		}, { arrayFormat: 'brackets' });
+	} else {
+		const queryString = qs.stringify(
+			{
+				search: {
+					query: '',
+					filters: {
+						category: options.categories.map(convertCategory),
+						subcategory: options.subcategories.map(convertSubcategory),
+						difficulty: [difficultyMap[options.difficulty]]
+					},
+					limit: true,
+					random: options.limit
+				}
+			},
+			{ arrayFormat: 'brackets' }
+		);
 		return `https://www.quizdb.org/api/random?${queryString}`;
 	}
 }
 
 export function compileCardRequest(root: string, options: CardRequestConfig) {
 	const req = root + '?';
-	
+
 	let categories = 'categories=';
 	options.categories.forEach((category, i) => {
 		if (i === options.categories.length - 1) {
 			categories += category;
-		}
-		else {
+		} else {
 			categories += category + ',';
 		}
 	});
@@ -60,15 +48,14 @@ export function compileCardRequest(root: string, options: CardRequestConfig) {
 	options.subcategories.forEach((subcategory, i) => {
 		if (i === options.subcategories.length - 1) {
 			subcategories += subcategory;
-		}
-		else {
+		} else {
 			subcategories += subcategory + ',';
 		}
-	})
+	});
 
 	const limit = options.limit ? `&limit=${options.limit}` : '';
 
-	return req + categories + subcategories + limit ;
+	return req + categories + subcategories + limit;
 }
 
 export function convertCategory(category: string) {
@@ -83,14 +70,60 @@ export async function processCards(text: string, category: string, subcategory: 
 	return new Promise((resolve) => {
 		const raw = text.split(/;?\n/);
 		raw.pop();
-		const cards = raw.map((card) => card.split('\t')).map((pair) => ({
-			category,
-			subcategory,
-			hint: pair[0],
-			answer: cleanCard(pair[1])
-		}));
+		const cards = raw
+			.map((card) => card.split('\t'))
+			.map((pair) => ({
+				category,
+				subcategory,
+				hint: pair[0],
+				answer: cleanCard(pair[1])
+			}));
 		resolve(cards);
 	});
+}
+
+export function checkAns(userAns: string, answer: string) {
+	let ans = answer.trim().toLowerCase();
+	let user = userAns.trim().toLowerCase();
+
+	if (user === '') {
+		return false;
+	}
+
+	const matcher = /\s*\[(\w|\s|&|\.|\?|;|\/|"|,|“|”)+\]/;
+	ans = ans.slice(0, ans.match(matcher)?.index || ans.length);
+	let special = ans.slice(ans.match(matcher)?.index || ans.length).trim();
+	console.log(ans);
+
+	const answers = ans.split(/(\s|\[|\()or\s/);
+
+	for (const option of answers) {
+		if (
+			option === user ||
+			option.includes(user) ||
+			user.includes(option) ||
+			option.includes(
+				user.replace(/(\+|-|\.|:)/g, (str) => {
+					switch (str) {
+						case '+':
+							return 'plus';
+						case '-':
+							return 'minus';
+						case '.':
+							return 'dot';
+						case ':':
+							return 'colon';
+					}
+				})
+			)
+		) {
+			return true;
+		}
+		if (compareTwoStrings(option, user) >= 0.5) {
+			return true;
+		}
+	}
+	return false;
 }
 
 function cleanCard(card: string) {
@@ -101,22 +134,22 @@ function cleanCard(card: string) {
 		newCard = newCard.replace(/^"/, '');
 		newCard = newCard.replace(/""/g, '"');
 	}
-	
+
 	return newCard;
 }
 
 const categoryMap = {
 	'Current Events': 26,
 	'Fine Arts': 21,
-	'Geography': 20,
-	'History': 18,
-	'Literature': 15,
-	'Mythology': 14,
-	'Philosophy': 25,
-	'Religion': 19,
-	'Science': 17,
+	Geography: 20,
+	History: 18,
+	Literature: 15,
+	Mythology: 14,
+	Philosophy: 25,
+	Religion: 19,
+	Science: 17,
 	'Social Science': 22,
-	'Trash': 16
+	Trash: 16
 } as const;
 
 const subcategoryMap = {

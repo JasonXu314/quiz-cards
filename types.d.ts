@@ -27,21 +27,21 @@ interface Question {
 		difficulty: string;
 		difficulty_num: number;
 		url: string;
-	}
+	};
 	category: {
 		id: number;
 		name: string;
 		created_at: string;
 		updated_at: string;
 		url: string;
-	}
+	};
 	subcategory: {
 		id: number;
 		name: string;
 		created_at: string;
 		updated_at: string;
 		url: string;
-	}
+	};
 }
 
 interface Card {
@@ -76,6 +76,6 @@ interface CardRequestConfig {
 type AppMode = 'read' | 'card';
 
 type ImportCardReducerAction =
-	{ type: 'SET', cards: ProtoCard[] } |
-	{ type: 'CATEGORY', i: number, category: string } |
-	{ type: 'SUBCATEGORY', i: number, subcategory: string };
+	| { type: 'SET'; cards: ProtoCard[] }
+	| { type: 'CATEGORY'; i: number; category: string }
+	| { type: 'SUBCATEGORY'; i: number; subcategory: string };

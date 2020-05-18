@@ -33,6 +33,6 @@ const ImportCard: React.FC<Props> = memo(({ card, dispatch, index }) => {
 		</select>
 		</div>
 	);
-}, (prev, next) => prev.dispatch === next.dispatch);
+}, (prev, next) => prev.dispatch === next.dispatch && Object.is(prev.card, next.card));
 
 export default ImportCard;

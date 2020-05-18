@@ -46,6 +46,11 @@ const Index: NextPage<{}> = () => {
 			</div>
 
 			<div className = {styles.content}>
+				<div className = {styles.buttons}>
+					<button onClick = {() => setPage(page - 1)} disabled = {page === 0}>&lt; Back</button>
+					<div>Page {page + 1}</div>
+					<button onClick = {() => setPage(page + 1)} disabled = {page === Math.floor(cards.length/100)}>Next &gt;</button>
+				</div>
 				{cards.slice(page * 100, (page + 1) * 100).map((card) => <Link href = "/edit/[_id]" as = {`/edit/${card._id}`} key = {card._id}>
 					<a>
 						<div className = {styles.card}>
@@ -55,8 +60,11 @@ const Index: NextPage<{}> = () => {
 						</div>
 					</a>
 				</Link>)}
-				<button onClick = {() => setPage(page - 1)} disabled = {page === 0}>&lt; Back</button>
-				<button onClick = {() => setPage(page + 1)} disabled = {page === Math.floor(cards.length/100)}>Next &gt;</button>
+				<div className = {styles.buttons}>
+					<button onClick = {() => setPage(page - 1)} disabled = {page === 0}>&lt; Back</button>
+					<div>Page {page + 1}</div>
+					<button onClick = {() => setPage(page + 1)} disabled = {page === Math.floor(cards.length/100)}>Next &gt;</button>
+				</div>
 			</div>
 		</div>
 	);

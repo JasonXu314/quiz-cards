@@ -15,7 +15,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 				const db = client.db('cards');
 				
 				await db.collection('cards').insertMany(cards.map((card) => ({ ...card, subcategory: card.subcategory === '' ? null : card.subcategory })));
-				res.status(200).send('Card Created!');
+				res.status(200).send('Cards Imported!');
 			}
 			catch (err) {
 				console.log(err);

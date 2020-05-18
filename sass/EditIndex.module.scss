@@ -1,6 +1,6 @@
 .main {
 	display: grid;
-	grid-template: "title ." "content sidebar" / 12fr 3fr;
+	grid-template: "title ." "content sidebar" / 12fr 2fr;
 
 	.title {
 		grid-area: title;
@@ -8,6 +8,12 @@
 
 	.content {
 		grid-area: content;
+
+		.buttons {
+			display: flex;
+			flex-direction: row;
+			justify-content: flex-start;
+		}
 
 		a {
 			text-decoration: none;

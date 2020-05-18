@@ -1,6 +1,6 @@
 .main {
 	display: grid;
-	grid-template: "title ." 1fr "cards sidebar" auto "spinner spinner" auto / 12fr 3fr;
+	grid-template: "title ." 1fr "cards sidebar" auto "spinner spinner" auto / 12fr 2fr;
 
 	.title {
 		grid-area: title;
@@ -17,6 +17,12 @@
 	}
 	.cards {
 		grid-area: cards;
+
+		.buttons {
+			display: flex;
+			flex-direction: row;
+			justify-content: flex-start;
+		}
 	}
 
 	.loading {

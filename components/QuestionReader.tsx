@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import styles from '../sass/QuestionReader.module.scss';
 
 interface Props {
@@ -29,12 +29,12 @@ const QuestionReader: React.FC<Props> = ({ question, speed, active, questionFini
 			clearInterval(intervalID);
 		};
 	}, [speed, active, question]);
-	
+
 	return (
-		<div className = {styles.main}>
+		<div className={styles.main}>
 			<div>{questionFinished ? question.text : questionText}</div>
-			<div>{questionFinished && question.answer}</div>
-			{questionFinished && <div className = {correct ? styles.correct : styles.incorrect}>{correct ? 'Correct' : 'Incorrect'}</div>}
+			{questionFinished && <div>Answer: {question.answer}</div>}
+			{questionFinished && <div className={correct ? styles.correct : styles.incorrect}>{correct ? 'Correct' : 'Incorrect'}</div>}
 		</div>
 	);
 };

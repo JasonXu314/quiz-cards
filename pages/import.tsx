@@ -28,6 +28,8 @@ const Import: NextPage<{ url: string }> = ({ url }) => {
 	const [subcategory, setSubcategory] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState(null);
+	const [page, setPage] = useState<number>(0);
+	const [msg, setMsg] = useState<string>('');
 	
 	return (
 		<div className = {styles.main}>
@@ -48,10 +50,15 @@ const Import: NextPage<{ url: string }> = ({ url }) => {
 						{catToSubcat[category].map((subcat: string, i: number) => <option key = {catToTags[category][i]} value = {subcat}>{subcat}</option>)}
 					</select>
 				</> : <button onClick = {() => {
-					axios.post('/api/cards/import', { cards }).catch((err) => {
-						console.log(err.response);
+					axios.post('/api/cards/import', { cards })
+						.then((res) => {
+							setMsg(res.data);
+							dispatch({ type: 'SET', cards: [] });
+						})
+						.catch((err) => {
+							console.log(err.response);
 							setError(err.response);
-					});
+						});
 				}}>Import!</button>}
 				<div>
 					<h3>Instructions:</h3>
@@ -69,7 +76,7 @@ const Import: NextPage<{ url: string }> = ({ url }) => {
 			</div>
 			
 			<div className = {styles.cards}>
-				{cards.length === 0 && !loading && <input type = "file" onChange = {(evt) => {
+				{cards.length === 0 && !loading ? <input type = "file" onChange = {(evt) => {
 						setLoading(true);
 						Array.from(evt.target.files).forEach((file) => {
 							file.text().then((text) => processCards(text, category, subcategory))
@@ -81,8 +88,20 @@ const Import: NextPage<{ url: string }> = ({ url }) => {
 									setLoading(false);
 								});
 						});
-					}} />}
-				{cards.map((card, i) => <ImportCard key = {i} card = {card} dispatch = {dispatch} index = {i} />)}
+					}} /> : <>
+						<div className = {styles.buttons}>
+							<button onClick = {() => setPage(page - 1)} disabled = {page === 0}>&lt; Back</button>
+							<div>Page {page + 1}</div>
+							<button onClick = {() => setPage(page + 1)} disabled = {page === Math.floor(cards.length/100)}>Next &gt;</button>
+						</div>
+						{cards.slice(page * 100, (page + 1) * 100).map((card, i) => <ImportCard key = {i} card = {card} dispatch = {dispatch} index = {i} />)}
+						<div className = {styles.buttons}>
+							<button onClick = {() => setPage(page - 1)} disabled = {page === 0}>&lt; Back</button>
+							<div>Page {page + 1}</div>
+							<button onClick = {() => setPage(page + 1)} disabled = {page === Math.floor(cards.length/100)}>Next &gt;</button>
+						</div>
+					</>}
+				{msg !== '' && <h3>{msg}</h3>}
 			</div>
 			<div className = {styles.loading}>
 				<div><img className = {styles.spinner} src = {url} alt = "Loading..." hidden = {!loading} /></div>

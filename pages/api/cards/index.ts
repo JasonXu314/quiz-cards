@@ -60,13 +60,15 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 				}
 
 
-				const query = categories.map((category) => ({ category }));
-				if (subcategories.length > 0) {
-					categories.forEach((category) => {
-						query.push(...subcategories.map((subcategory) => ({ category, subcategory })));
-					});
-				}
-				let cards = await db.collection('cards').find({ $or: query }).toArray();
+				let cards = await db.collection('cards').find({
+					$or: [
+						...categories.map((category) => subcategories.filter((subcategory) => subcategory.startsWith(category)).length > 0 ?  ({
+							$or: [
+								...subcategories.filter((subcategory) => subcategory.startsWith(category)).map((subcategory) => ({ subcategory })),
+							]
+						}) : ({ category }))
+					]
+				}).toArray();
 				if (req.query.limit) {
 					const start = Math.floor(Math.random() * (cards.length - limit));
 					cards = cards.slice(start, start + limit);
