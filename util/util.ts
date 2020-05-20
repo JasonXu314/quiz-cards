@@ -1,3 +1,4 @@
+import { toWords } from 'number-to-words';
 import qs from 'qs';
 import { compareTwoStrings } from 'string-similarity';
 
@@ -90,7 +91,7 @@ export function checkAns(userAns: string, answer: string) {
 		return false;
 	}
 
-	const matcher = /\s*\[(\w|\s|&|\.|\?|;|\/|"|,|“|”)+\]/;
+	const matcher = /\s*(\[|\()(\w|\s|&|\.|\?|;|\/|"|,|“|”)+(\)|\])/;
 	ans = ans.slice(0, ans.match(matcher)?.index || ans.length);
 	let special = ans.slice(ans.match(matcher)?.index || ans.length).trim();
 	console.log(ans);
@@ -115,7 +116,9 @@ export function checkAns(userAns: string, answer: string) {
 							return 'colon';
 					}
 				})
-			)
+			) ||
+			option.replace(/\d+/g, (sub) => toWords(parseInt(sub))).includes(user) ||
+			user.replace(/\d+/g, (sub) => toWords(parseInt(sub))).includes(option)
 		) {
 			return true;
 		}
