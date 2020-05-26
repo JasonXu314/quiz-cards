@@ -1,18 +1,19 @@
 import axios from 'axios';
 import Link from 'next/link';
 import { NextPage } from 'next/types';
-import { useCallback, useEffect, useReducer, useState } from 'react';
-import AnswerBox from '../components/AnswerBox';
-import Card from '../components/Card';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { useRecoilState } from 'recoil';
+import CardReader from '../components/CardReader';
 import CategorySelection from '../components/CategorySelection';
 import LimitSelector from '../components/LimitSelector';
 import ModeSelection from '../components/ModeSelection';
-import QuestionReader from '../components/QuestionReader';
+import QuestionReader from '../components/QuestionReader/QuestionReader';
 import SpeedSelector from '../components/SpeedSelector';
 import SubcategorySelection from '../components/SubcategorySelection';
 import Timer from '../components/Timer';
 import styles from '../sass/Index.module.scss';
-import { checkAns, compileCardRequest, compileQuestionRequest } from '../util/util';
+import { answeringState } from '../util/atoms';
+import { compileCardRequest, compileQuestionRequest } from '../util/util';
 
 const reducer: React.Reducer<string[], string> = (categories, category) => {
 	return categories.includes(category) ? categories.filter((cat) => cat !== category) : [...categories, category];
@@ -26,28 +27,26 @@ const Index: NextPage<{}> = () => {
 	const [cards, setCards] = useState<Card[]>([]);
 	const [questions, setQuestions] = useState<Question[]>([]);
 	const [speed, setSpeed] = useState<number>(120);
-	const [questionIndex, setQuestionIndex] = useState<number>(0);
-	const [cardIndex, setCardIndex] = useState<number>(0);
-	const [active, setActive] = useState<boolean>(false);
-	const [answering, setAnswering] = useState<boolean>(false);
-	const [userAnswer, setUserAnswer] = useState<string>('');
-	const [questionFinished, setQuestionFinished] = useState<boolean>(false);
-	const [correct, setCorrect] = useState<boolean>(false);
 	const [difficulty, setDifficulty] = useState<number>(3);
 	const [useLimit, setUseLimit] = useState<boolean>(false);
 	const [timeDisplay, setTimeDisplay] = useState<number>(0);
 	const [error, setError] = useState<string>(null);
 	const [msg, setMsg] = useState<string>(null);
-	const [cardFlipped, setCardFlipped] = useState<boolean>(false);
+	const [allowOperation, setAllowOperation] = useState<boolean>(true);
+	const [questionsEnd, setQuestionsEnd] = useState<boolean>(false);
+	const [allowQuery, setAllowQuery] = useState<boolean>(true);
+	const [timerActive, setTimerActive] = useState<boolean>(false);
+	const [time, setTime] = useState<number>(0);
+	const [correct, setCorrect] = useState<boolean>(false);
+	const [answering, setAnswering] = useRecoilState(answeringState);
+	const readerRef = useRef<QuestionReaderMethods>(null);
 
 	const request = useCallback(() => {
 		switch (mode) {
 			case 'read':
-				if (!active && !answering && (questionFinished || questions.length === 0)) {
-					setActive(false);
-					setAnswering(false);
-					setQuestionFinished(false);
+				if (allowQuery) {
 					setQuestions([]);
+					setError('');
 					axios(
 						compileQuestionRequest({
 							categories,
@@ -62,9 +61,6 @@ const Index: NextPage<{}> = () => {
 								setMsg(`No Questions for categories: ${categories.join(', ')} with subcategories: ${subcategories.join(', ')}`);
 							} else {
 								setQuestions(res.data.data.tossups);
-								setActive(true);
-								setQuestionFinished(false);
-								setQuestionIndex(0);
 							}
 						})
 						.catch((err) => {
@@ -73,6 +69,8 @@ const Index: NextPage<{}> = () => {
 				}
 				break;
 			case 'card':
+				setCards([]);
+				setError('');
 				axios(
 					compileCardRequest('/api/cards', {
 						categories,
@@ -92,61 +90,16 @@ const Index: NextPage<{}> = () => {
 					});
 				break;
 		}
-	}, [mode, active, answering, questionFinished, questions.length, categories, subcategories, useLimit, limit]);
+	}, [mode, questions.length, categories, subcategories, useLimit, limit]);
 
 	const keypressHandler = useCallback(
 		(evt: KeyboardEvent) => {
-			switch (evt.code) {
-				case 'Space':
-					if (mode === 'read' && active && !answering && !questionFinished) {
-						setActive(false);
-						setAnswering(true);
-					} else if (mode === 'card') {
-						setCardFlipped(!cardFlipped);
-					}
-					break;
-				case 'KeyN':
-					if (mode === 'read' && !active && !answering && questionFinished) {
-						if (questionIndex !== questions.length - 1) {
-							setActive(true);
-							setAnswering(false);
-							setQuestionFinished(false);
-							setUserAnswer('');
-							setQuestionIndex(questionIndex + 1);
-						} else {
-							setMsg('No Questions Remaining!');
-						}
-					} else if (mode === 'card') {
-						if (cardFlipped) {
-							setCardFlipped(false);
-						}
-						if (cardIndex === cards.length - 1) {
-							setCardIndex(0);
-						} else {
-							setCardIndex(cardIndex + 1);
-						}
-					}
-					break;
-				case 'KeyB':
-					if (mode === 'card') {
-						if (cardFlipped) {
-							setCardFlipped(false);
-						}
-						if (cardIndex === 0) {
-							setCardIndex(cards.length - 1);
-						} else {
-							setCardIndex(cardIndex - 1);
-						}
-					}
-					break;
-				case 'KeyL':
-					request();
-					break;
-				default:
-					break;
+			if (evt.code === 'KeyL' && allowQuery) {
+				readerRef.current.performReset();
+				request();
 			}
 		},
-		[active, answering, questionFinished, questionIndex, mode, categories, subcategories, questions, cards, questions, cardIndex, cardFlipped]
+		[allowQuery, request, readerRef.current]
 	);
 
 	useEffect(() => {
@@ -162,19 +115,22 @@ const Index: NextPage<{}> = () => {
 	}, []);
 
 	useEffect(() => {
-		document.addEventListener('keyup', keypressHandler);
+		localStorage.setItem('categories', JSON.stringify(categories));
+		localStorage.setItem('subcategories', JSON.stringify(subcategories));
+		localStorage.setItem('mode', mode);
+	}, [categories, subcategories, mode]);
 
-		window.onbeforeunload = () => {
-			localStorage.setItem('categories', JSON.stringify(categories));
-			localStorage.setItem('subcategories', JSON.stringify(subcategories));
-			localStorage.setItem('mode', mode);
-		};
+	useEffect(() => {
+		document.addEventListener('keyup', keypressHandler);
 
 		return () => {
 			document.removeEventListener('keyup', keypressHandler);
-			window.onbeforeunload = null;
 		};
 	}, [keypressHandler]);
+
+	useEffect(() => {
+		setMsg('');
+	}, [mode, categories, subcategories]);
 
 	return (
 		<div className={styles.main}>
@@ -183,11 +139,11 @@ const Index: NextPage<{}> = () => {
 				<h3>{timeDisplay.toFixed(2)} s</h3>
 				{questions.length > 0 ? (
 					<Timer
-						active={active}
-						time={questions[questionIndex].text.split(' ').length * speed + 5000}
+						active={timerActive}
+						time={time}
 						timeout={() => {
-							setActive(false);
-							setQuestionFinished(true);
+							setAllowOperation(true);
+							setAllowQuery(true);
 						}}
 						tick={(remTime) => setTimeDisplay(remTime / 1000)}
 					/>
@@ -200,9 +156,9 @@ const Index: NextPage<{}> = () => {
 						time={7500}
 						timeout={() => {
 							setAnswering(false);
-							setActive(false);
-							setQuestionFinished(true);
-							setCorrect(checkAns(userAnswer, questions[questionIndex].answer));
+							setAllowOperation(true);
+							setAllowQuery(true);
+							readerRef.current.endQuestion();
 						}}
 						tick={(remTime) => setTimeDisplay(remTime / 1000)}
 						answerTimer
@@ -235,16 +191,18 @@ const Index: NextPage<{}> = () => {
 				<div>
 					<h4>Hotkeys</h4>
 					<div>
-						<strong>L</strong>: Load Questions/Cards
+						<strong>L</strong>: Load {mode === 'read' ? 'Questions' : 'Cards'}
 					</div>
 					<div>
-						<strong>N</strong>: Next Question/Card
+						<strong>N</strong>: Next {mode === 'read' ? 'Question' : 'Card'}
 					</div>
+					{mode === 'card' && (
+						<div>
+							<strong>B</strong>: Previous Card
+						</div>
+					)}
 					<div>
-						<strong>B</strong>: Previous Card
-					</div>
-					<div>
-						<strong>Spacebar</strong>: Buzz/Flip Card
+						<strong>Spacebar</strong>: {mode === 'read' ? 'Buzz' : 'Flip Card'}
 					</div>
 				</div>
 				<div>
@@ -265,80 +223,24 @@ const Index: NextPage<{}> = () => {
 			</div>
 
 			<div className={styles.content}>
-				<div className={styles.row}>
-					<button className={styles.secondary} onClick={request}>
-						Load {mode === 'card' ? 'Cards' : 'Questions'}
-					</button>
-					<button
-						className={styles.action}
-						onClick={() => {
-							setActive(false);
-							setAnswering(true);
+				{mode === 'read' ? (
+					<QuestionReader
+						{...{
+							questions,
+							speed,
+							setAllowQuery,
+							setAllowOperation,
+							setMsg,
+							request,
+							setTime,
+							correct,
+							setCorrect,
+							setTimerActive
 						}}
-						disabled={mode === 'card' || !active || answering || questionFinished}>
-						Buzz!
-					</button>
-					<button
-						className={styles.secondary}
-						onClick={() => {
-							setCardFlipped(!cardFlipped);
-							if (cardIndex === 0) {
-								setCardIndex(cards.length - 1);
-							} else {
-								setCardIndex(cardIndex - 1);
-							}
-						}}
-						disabled={mode === 'read' || cards.length === 0}>
-						&lt; Back
-					</button>
-					<button
-						className={styles.primary}
-						onClick={() => {
-							if (mode === 'read') {
-								setActive(true);
-								setQuestionFinished(false);
-								setQuestionIndex(questionIndex + 1);
-								setUserAnswer('');
-							} else {
-								setCardFlipped(!cardFlipped);
-								if (cardIndex === cards.length - 1) {
-									setCardIndex(0);
-								} else {
-									setCardIndex(cardIndex + 1);
-								}
-							}
-						}}
-						disabled={mode === 'read' ? active || answering || !questionFinished || questionIndex === questions.length - 1 : cards.length === 0}>
-						Next &gt;
-					</button>
-				</div>
-				{mode === 'read'
-					? questions.length > 0 && (
-							<>
-								<QuestionReader
-									question={questions[questionIndex]}
-									speed={speed}
-									setActive={setActive}
-									active={active}
-									questionFinished={questionFinished}
-									correct={correct}
-								/>
-								{questionFinished && <div>Your Answer: {userAnswer}</div>}
-							</>
-					  )
-					: cards.length > 0 && <Card flipped={cardFlipped} setFlipped={setCardFlipped} card={cards[cardIndex]} />}
-				{answering && (
-					<AnswerBox
-						onChange={(evt) => setUserAnswer(evt.target.value)}
-						value={userAnswer}
-						onSubmit={(evt) => {
-							evt.preventDefault();
-							setAnswering(false);
-							setActive(false);
-							setQuestionFinished(true);
-							setCorrect(checkAns(userAnswer, questions[questionIndex].answer));
-						}}
+						ref={readerRef}
 					/>
+				) : (
+					<CardReader {...{ cards, request }} />
 				)}
 				<div className={styles.msg}>{msg}</div>
 				<div className={styles.error}>{error}</div>

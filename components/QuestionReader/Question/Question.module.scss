@@ -1,0 +1,23 @@
+.main {
+	margin: 1em;
+
+	.info {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-around;
+		padding-top: 0.55em;
+		padding-bottom: 0.55em;
+		background: linear-gradient(to top, #eeeeee 0%, #fefefe 50%);
+		border-left: 1px solid #bbbbbb;
+		border-top: 1px solid #bbbbbb;
+		border-right: 1px solid #bbbbbb;
+		border-radius: 10px 10px 0 0;
+	}
+
+	.question {
+		background: #f4f4f4;
+		border: 1px solid #bbbbbb;
+		border-radius: 0 0 10px 10px;
+		padding: 1em;
+	}
+}

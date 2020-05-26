@@ -7,11 +7,12 @@
     "@types/string-similarity": "^3.0.0",
     "axios": "^0.19.2",
     "mongodb": "^3.5.7",
-    "next": "^9.3.6",
+    "next": "^9.4.2",
     "number-to-words": "^1.2.4",
     "qs": "^6.9.4",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "recoil": "0.0.7",
     "sass": "^1.26.5",
     "string-similarity": "^4.0.1"
   },

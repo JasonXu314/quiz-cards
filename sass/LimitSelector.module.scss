@@ -1,7 +1,7 @@
 .main {
 	.limit {
 		width: 5em;
-		margin: 0.2em;
+		margin: 0.3em 0.3em 0.3em 0;
 	}
 
 	.switch {
@@ -10,15 +10,15 @@
 		border-radius: 10px;
 		position: relative;
 		display: inline-block;
-		background: #CCCCCC;
+		background: #cccccc;
 		margin-left: 0.3em;
 		transition: background 0.2s;
 
 		&.checked {
-			background: #2196F3;
+			background: #2196f3;
 		}
 
-		input[type=checkbox] {
+		input[type='checkbox'] {
 			opacity: 0;
 			height: 0;
 			width: 0;
@@ -33,9 +33,9 @@
 		input:checked + span::before {
 			transform: translate(20px);
 		}
-		
+
 		span::before {
-			content: "";
+			content: '';
 			height: 16px;
 			width: 16px;
 			border-radius: 50%;

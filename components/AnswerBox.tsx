@@ -1,4 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
+import styles from '../sass/AnswerBox.module.scss';
+import Pencil from './Pencil';
 
 interface Props {
 	value: string;
@@ -12,10 +14,13 @@ const AnswerBox: React.FC<Props> = ({ value, onChange, onSubmit }) => {
 	useEffect(() => {
 		inputRef.current.focus();
 	});
-	
+
 	return (
-		<form onSubmit = {onSubmit}>
-			<input type = "text" onChange = {onChange} value = {value} ref = {inputRef} />
+		<form onSubmit={onSubmit} className={styles.main}>
+			<button type="submit" className={styles.submit}>
+				<Pencil height={12} width={12} /> Guess:
+			</button>
+			<input type="text" onChange={onChange} value={value} ref={inputRef} className={styles.input} />
 		</form>
 	);
 };

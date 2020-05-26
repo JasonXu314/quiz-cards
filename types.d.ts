@@ -44,6 +44,14 @@ interface Question {
 	};
 }
 
+interface UsedQuestion {
+	question: Question;
+	buzzLocation: number;
+	hasPower: boolean;
+	powerIndex: number;
+	userAnswer: string;
+}
+
 interface Card {
 	hint: string;
 	answer: string;
@@ -79,3 +87,8 @@ type ImportCardReducerAction =
 	| { type: 'SET'; cards: ProtoCard[] }
 	| { type: 'CATEGORY'; i: number; category: string }
 	| { type: 'SUBCATEGORY'; i: number; subcategory: string };
+
+interface QuestionReaderMethods {
+	endQuestion: () => void;
+	performReset: () => void;
+}
