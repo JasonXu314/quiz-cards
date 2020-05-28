@@ -12,7 +12,6 @@ interface Props {
 	questions: Question[];
 	speed: number;
 	setAllowQuery: React.Dispatch<React.SetStateAction<boolean>>;
-	setAllowOperation: React.Dispatch<React.SetStateAction<boolean>>;
 	setMsg: React.Dispatch<React.SetStateAction<string>>;
 	setTime: React.Dispatch<React.SetStateAction<number>>;
 	correct: boolean;
@@ -22,7 +21,7 @@ interface Props {
 }
 
 const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props> = (
-	{ questions, speed, setAllowQuery, setAllowOperation, setMsg, request, setTime, correct, setCorrect, setTimerActive },
+	{ questions, speed, setAllowQuery, setMsg, request, setTime, correct, setCorrect, setTimerActive },
 	ref
 ) => {
 	const [questionTokens, setQuestionTokens] = useState<string[]>([]);
@@ -34,6 +33,7 @@ const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props>
 	const [answering, setAnswering] = useRecoilState(answeringState);
 	const [userAnswer, setUserAnswer] = useState<string>('');
 	const [questionIndex, setQuestionIndex] = useState<number>(0);
+	const [tooltipShown, setTooltipShown] = useState<string>(null);
 
 	useImperativeHandle(ref, () => ({
 		endQuestion: () => {
@@ -60,7 +60,6 @@ const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props>
 				case 'Space':
 					if (active && !answering) {
 						setAllowQuery(false);
-						setAllowOperation(false);
 						setAnswering(true);
 						setTimerActive(false);
 						setActive(false);
@@ -75,7 +74,6 @@ const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props>
 							setAnswering(false);
 							setUserAnswer('');
 							setQuestionIndex(questionIndex + 1);
-							setAllowOperation(false);
 							setAllowQuery(false);
 							questionRef.current.push({ question: questions[questionIndex], buzzLocation: idx, hasPower: powerIndex !== -1, powerIndex, userAnswer });
 						} else {
@@ -134,7 +132,7 @@ const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props>
 	return (
 		<div className={styles.main}>
 			<div className={styles.row}>
-				<button className={styles.secondary} onClick={request}>
+				<button className={styles.secondary} onClick={request} onMouseEnter={() => setTooltipShown('load')} onMouseLeave={() => setTooltipShown(null)}>
 					Load Questions
 				</button>
 				<button
@@ -142,12 +140,12 @@ const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props>
 					onClick={() => {
 						setActive(false);
 						setAnswering(true);
-						setAllowOperation(false);
 						setAllowQuery(false);
 					}}
-					disabled={!active || answering || questionFinished}>
-					<Bell height={12} width={12} />
-					Buzz!
+					disabled={!active || answering || questionFinished}
+					onMouseEnter={() => setTooltipShown('buzz')}
+					onMouseLeave={() => setTooltipShown(null)}>
+					<Bell height={12} width={12} /> Buzz!
 				</button>
 				<button
 					className={styles.primary}
@@ -156,10 +154,11 @@ const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props>
 						setQuestionFinished(false);
 						setQuestionIndex(questionIndex + 1);
 						setUserAnswer('');
-						setAllowOperation(false);
 						setAllowQuery(false);
 					}}
-					disabled={active || answering || !questionFinished || questionIndex === questions.length - 1}>
+					disabled={active || answering || !questionFinished || questionIndex === questions.length - 1}
+					onMouseEnter={() => setTooltipShown('next')}
+					onMouseLeave={() => setTooltipShown(null)}>
 					Next &gt;
 				</button>
 			</div>
@@ -173,7 +172,6 @@ const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props>
 						setActive(false);
 						setQuestionFinished(true);
 						setCorrect(checkAns(userAnswer, questions[questionIndex].answer));
-						setAllowOperation(true);
 						setAllowQuery(true);
 					}}
 				/>
@@ -231,6 +229,9 @@ const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props>
 					/>
 				)
 			)}
+			<div className={tooltipShown === 'load' ? `${styles.tooltip} ${styles.load} ${styles.shown}` : `${styles.tooltip} ${styles.load}`}>Hotkey: L</div>
+			<div className={tooltipShown === 'buzz' ? `${styles.tooltip} ${styles.buzz} ${styles.shown}` : `${styles.tooltip} ${styles.buzz}`}>Hotkey: B</div>
+			<div className={tooltipShown === 'next' ? `${styles.tooltip} ${styles.next} ${styles.shown}` : `${styles.tooltip} ${styles.next}`}>Hotkey: N</div>
 		</div>
 	);
 };

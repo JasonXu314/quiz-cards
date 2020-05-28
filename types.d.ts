@@ -58,6 +58,7 @@ interface Card {
 	subcategory: string | null;
 	category: string;
 	_id: string;
+	author: string | null;
 }
 
 interface ProtoCard {

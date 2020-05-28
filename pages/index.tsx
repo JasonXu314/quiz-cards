@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { NextPage } from 'next/types';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import CardReader from '../components/CardReader';
+import CardReader from '../components/CardReader/CardReader';
 import CategorySelection from '../components/CategorySelection';
 import LimitSelector from '../components/LimitSelector';
 import ModeSelection from '../components/ModeSelection';
@@ -32,8 +32,6 @@ const Index: NextPage<{}> = () => {
 	const [timeDisplay, setTimeDisplay] = useState<number>(0);
 	const [error, setError] = useState<string>(null);
 	const [msg, setMsg] = useState<string>(null);
-	const [allowOperation, setAllowOperation] = useState<boolean>(true);
-	const [questionsEnd, setQuestionsEnd] = useState<boolean>(false);
 	const [allowQuery, setAllowQuery] = useState<boolean>(true);
 	const [timerActive, setTimerActive] = useState<boolean>(false);
 	const [time, setTime] = useState<number>(0);
@@ -110,7 +108,16 @@ const Index: NextPage<{}> = () => {
 			JSON.parse(localStorage.getItem('subcategories')).forEach((subcategory) => subcategoryDispatch(subcategory));
 		}
 		if (localStorage.getItem('mode')) {
-			setMode(localStorage.getItem('mode') as AppMode);
+			const persistMode = localStorage.getItem('mode') as AppMode;
+
+			setMode(persistMode);
+
+			if (persistMode === 'card' && localStorage.getItem('card:limit')) {
+				setUseLimit(true);
+				setLimit(parseInt(localStorage.getItem('card:limit')));
+			} else if (localStorage.getItem('read:limit')) {
+				setLimit(parseInt(localStorage.getItem('read:limit')));
+			}
 		}
 	}, []);
 
@@ -118,7 +125,17 @@ const Index: NextPage<{}> = () => {
 		localStorage.setItem('categories', JSON.stringify(categories));
 		localStorage.setItem('subcategories', JSON.stringify(subcategories));
 		localStorage.setItem('mode', mode);
-	}, [categories, subcategories, mode]);
+
+		if (mode === 'card') {
+			if (useLimit) {
+				localStorage.setItem('card:limit', limit.toString());
+			} else {
+				localStorage.removeItem('card:limit');
+			}
+		} else {
+			localStorage.setItem('read:limit', limit.toString());
+		}
+	}, [categories, subcategories, mode, limit, useLimit]);
 
 	useEffect(() => {
 		document.addEventListener('keyup', keypressHandler);
@@ -142,7 +159,6 @@ const Index: NextPage<{}> = () => {
 						active={timerActive}
 						time={time}
 						timeout={() => {
-							setAllowOperation(true);
 							setAllowQuery(true);
 						}}
 						tick={(remTime) => setTimeDisplay(remTime / 1000)}
@@ -156,7 +172,6 @@ const Index: NextPage<{}> = () => {
 						time={7500}
 						timeout={() => {
 							setAnswering(false);
-							setAllowOperation(true);
 							setAllowQuery(true);
 							readerRef.current.endQuestion();
 						}}
@@ -189,23 +204,6 @@ const Index: NextPage<{}> = () => {
 					)}
 				</form>
 				<div>
-					<h4>Hotkeys</h4>
-					<div>
-						<strong>L</strong>: Load {mode === 'read' ? 'Questions' : 'Cards'}
-					</div>
-					<div>
-						<strong>N</strong>: Next {mode === 'read' ? 'Question' : 'Card'}
-					</div>
-					{mode === 'card' && (
-						<div>
-							<strong>B</strong>: Previous Card
-						</div>
-					)}
-					<div>
-						<strong>Spacebar</strong>: {mode === 'read' ? 'Buzz' : 'Flip Card'}
-					</div>
-				</div>
-				<div>
 					<Link href="/create">
 						<a rel="noopener noreferrer">Create new cards</a>
 					</Link>
@@ -229,7 +227,6 @@ const Index: NextPage<{}> = () => {
 							questions,
 							speed,
 							setAllowQuery,
-							setAllowOperation,
 							setMsg,
 							request,
 							setTime,

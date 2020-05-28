@@ -1,9 +1,11 @@
 .main {
 	display: grid;
-	grid-template: "title ." 1fr "card sidebar" auto / 12fr 2fr;
+	grid-template: 'title .' 1fr 'card sidebar' auto / 12fr 2fr;
 
 	.title {
 		grid-area: title;
+		font-size: 2em;
+		padding: 0.1em;
 	}
 
 	.sidebar {
@@ -12,9 +14,59 @@
 
 	.card {
 		grid-area: card;
+		padding: 1em;
+
+		h4 {
+			margin: 0.2em;
+		}
+
+		textarea {
+			font-family: Arial, Helvetica, sans-serif;
+			padding: 0.25em 0.5em;
+			border: 1px solid #cccccc;
+			border-radius: 6px 6px 0 6px;
+			outline: none;
+		}
 
 		.error {
 			color: red;
+		}
+
+		input {
+			padding: 0.5em 0.75em;
+			outline: none;
+			border: 1px solid #cccccc;
+			border-radius: 6px;
+			width: 20em;
+			display: block;
+			margin-top: 1.5em;
+		}
+
+		.label {
+			color: rgb(117, 117, 117);
+			position: absolute;
+			font-size: calc(40px / 3);
+			font-family: Arial, Helvetica, sans-serif;
+			transform: translate(1em, -1.75em);
+			transition: transform 75ms linear;
+		}
+
+		input:focus + .label,
+		input:not([value='']) + .label {
+			transform: translate(-0.1em, -3.5em) scale(0.9);
+		}
+
+		button {
+			margin: 0.5em 0.75em;
+			padding: 0.5em 0.75em;
+			margin-left: 0.2em;
+			margin-right: 0.2em;
+			border: 1px solid #cccccc;
+			border-radius: 3px;
+			cursor: pointer;
+			background: linear-gradient(#49afcd, #2f96b4);
+			border: 1px solid #2f96b4;
+			color: white;
 		}
 	}
 }

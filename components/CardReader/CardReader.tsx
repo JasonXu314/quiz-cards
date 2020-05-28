@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import styles from '../sass/CardReader.module.scss';
-import Card from './Card';
+import Card from './Card/Card';
+import styles from './CardReader.module.scss';
 
 interface Props {
 	cards: Card[];
@@ -10,6 +10,7 @@ interface Props {
 const CardReader: React.FC<Props> = ({ cards, request }) => {
 	const [cardIndex, setCardIndex] = useState<number>(0);
 	const [cardFlipped, setCardFlipped] = useState<boolean>(false);
+	const [tooltipShown, setTooltipShown] = useState<string>(null);
 
 	const keypressHandler = useCallback(
 		(evt: KeyboardEvent) => {
@@ -53,37 +54,48 @@ const CardReader: React.FC<Props> = ({ cards, request }) => {
 	return (
 		<div className={styles.main}>
 			<div className={styles.row}>
-				<button className={styles.secondary} onClick={request}>
+				<button className={styles.secondary} onClick={request} onMouseEnter={() => setTooltipShown('load')} onMouseLeave={() => setTooltipShown(null)}>
 					Load Cards
 				</button>
 				<button
 					className={styles.secondary}
 					onClick={() => {
-						setCardFlipped(!cardFlipped);
+						if (cardFlipped) {
+							setCardFlipped(false);
+						}
 						if (cardIndex === 0) {
 							setCardIndex(cards.length - 1);
 						} else {
 							setCardIndex(cardIndex - 1);
 						}
 					}}
-					disabled={cards.length === 0}>
+					disabled={cards.length === 0}
+					onMouseEnter={() => setTooltipShown('back')}
+					onMouseLeave={() => setTooltipShown(null)}>
 					&lt; Back
 				</button>
 				<button
 					className={styles.primary}
 					onClick={() => {
-						setCardFlipped(!cardFlipped);
+						if (cardFlipped) {
+							setCardFlipped(false);
+						}
 						if (cardIndex === cards.length - 1) {
 							setCardIndex(0);
 						} else {
 							setCardIndex(cardIndex + 1);
 						}
 					}}
-					disabled={cards.length === 0}>
+					disabled={cards.length === 0}
+					onMouseEnter={() => setTooltipShown('next')}
+					onMouseLeave={() => setTooltipShown(null)}>
 					Next &gt;
 				</button>
 			</div>
 			{cards.length > 0 && <Card flipped={cardFlipped} setFlipped={setCardFlipped} card={cards[cardIndex]} />}
+			<div className={tooltipShown === 'load' ? `${styles.tooltip} ${styles.load} ${styles.shown}` : `${styles.tooltip} ${styles.load}`}>Hotkey: L</div>
+			<div className={tooltipShown === 'back' ? `${styles.tooltip} ${styles.back} ${styles.shown}` : `${styles.tooltip} ${styles.back}`}>Hotkey: B</div>
+			<div className={tooltipShown === 'next' ? `${styles.tooltip} ${styles.next} ${styles.shown}` : `${styles.tooltip} ${styles.next}`}>Hotkey: N</div>
 		</div>
 	);
 };

@@ -1,0 +1,53 @@
+@mixin button-base($color) {
+	padding: 0.5em 0.75em;
+	margin: 0 0.2em;
+	@if $color == white {
+		border: 1px solid #cccccc;
+	} @else {
+		border: 1px solid darken($color, 10%);
+		color: white;
+	}
+	border-radius: 3px;
+	cursor: pointer;
+	background: linear-gradient($color, darken($color, 10%));
+
+	&:disabled {
+		cursor: not-allowed;
+		opacity: 0.65;
+	}
+}
+
+@mixin tooltip {
+	.tooltip {
+		font-size: 0.8em;
+		padding: 0.4em 1em;
+		background: lighten(black, 10%);
+		border-radius: 4px;
+		display: inline-block;
+		position: absolute;
+		color: white;
+		font-family: Arial, Helvetica, sans-serif;
+		transform: translate(-50%, -160%);
+		top: 58.53125px;
+		opacity: 0;
+		transition: opacity 100ms linear;
+
+		&::after {
+			content: '';
+			display: block;
+			position: absolute;
+			left: 50%;
+			bottom: 0;
+			transform: translate(-50%, 7px);
+			height: 0;
+			width: 0;
+			border-top: 8px solid lighten(black, 10%);
+			border-left: 8px solid transparent;
+			border-right: 8px solid transparent;
+		}
+
+		&.shown {
+			opacity: 0.85;
+		}
+	}
+}

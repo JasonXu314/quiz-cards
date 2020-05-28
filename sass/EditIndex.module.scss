@@ -1,9 +1,14 @@
+@use 'mixins';
+@use 'colors';
+
 .main {
 	display: grid;
-	grid-template: "title ." "content sidebar" / 12fr 2fr;
+	grid-template: 'title .' 'content sidebar' / 12fr 2fr;
 
 	.title {
 		grid-area: title;
+		font-size: 2em;
+		padding: 0.1em;
 	}
 
 	.content {
@@ -13,17 +18,49 @@
 			display: flex;
 			flex-direction: row;
 			justify-content: flex-start;
+			padding: 0.25em 0.625em;
+
+			div {
+				font-size: 1.1em;
+				padding: 0.2em 0.6em;
+				margin: 0 0.1em;
+			}
+
+			.button {
+				@include mixins.button-base(colors.$secondary);
+			}
 		}
 
 		a {
 			text-decoration: none;
-			
+
 			.card {
 				border: 2px solid black;
 				margin: 0.5em;
 				padding: 0.2em;
 				color: black;
-	
+
+				.hint {
+					margin: 0.4em 0.3em;
+				}
+
+				.answer {
+					margin: 0.2em 0.3em;
+				}
+
+				.category {
+					margin: 0.2em 0.3em;
+					font-weight: normal;
+				}
+
+				.author {
+					margin: 0.3em;
+				}
+
+				&:hover {
+					background: darken(white, 5%);
+				}
+
 				p {
 					margin: 0.1em;
 				}
@@ -33,5 +70,10 @@
 
 	.sidebar {
 		grid-area: sidebar;
+
+		button {
+			@include mixins.button-base(colors.$secondary);
+			margin: 0.5em 0.2em;
+		}
 	}
 }
