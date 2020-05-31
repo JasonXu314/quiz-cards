@@ -65,7 +65,8 @@ interface ProtoCard {
 	hint: string;
 	answer: string;
 	category: string;
-	subcategory: strin | null;
+	subcategory: string | null;
+	author: string | null;
 }
 
 interface QuestionRequestConfig {
@@ -73,7 +74,7 @@ interface QuestionRequestConfig {
 	limit: number;
 	internal: boolean;
 	subcategories: string[];
-	difficulty: number;
+	difficulties: number[];
 }
 
 interface CardRequestConfig {

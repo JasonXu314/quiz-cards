@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { NextPage } from 'next';
+import Head from 'next/head';
 import { useState } from 'react';
+import StyledInput from '../components/StyledInput/StyledInput';
 import styles from '../sass/Create.module.scss';
 import { categories, categoryTags, catToSubcat, catToTags } from '../util/constants';
 
@@ -15,6 +17,9 @@ const Create: NextPage<{}> = () => {
 
 	return (
 		<div className={styles.main}>
+			<Head>
+				<title>QuizCards - Create</title>
+			</Head>
 			<div className={styles.title}>QuizCards</div>
 			<div className={styles.sidebar}>
 				<h4>Category:</h4>
@@ -69,9 +74,8 @@ const Create: NextPage<{}> = () => {
 				<h4>Hint:</h4>
 				<textarea cols={60} rows={4} onChange={(evt) => setHint(evt.target.value)} value={hint} />
 				<h4>Answer:</h4>
-				<textarea cols={60} rows={4} onChange={(evt) => setAnswer(evt.target.value)} value={answer} />
-				<input type="text" onChange={(evt) => setAuthor(evt.target.value)} value={author} />
-				<div className={styles.label}>Your name (optional)</div>
+				<textarea className={styles.last} cols={60} rows={4} onChange={(evt) => setAnswer(evt.target.value)} value={answer} />
+				<StyledInput onChange={(evt) => setAuthor(evt.target.value)} value={author} placeholder="Your Name (optional)" />
 				<div>
 					<button type="submit">Create!</button>
 				</div>

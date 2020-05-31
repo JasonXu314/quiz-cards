@@ -1,9 +1,9 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { answeringState } from '../../util/atoms';
+import { activeState, answeringState, questionIndexState, readingStartState, usedQuestionsState } from '../../util/atoms';
 import { checkAns } from '../../util/util';
-import AnswerBox from '../AnswerBox';
 import Bell from '../Bell';
+import AnswerBox from './AnswerBox/AnswerBox';
 import CompletedQuestion from './CompletedQuestion/CompletedQuestion';
 import Question from './Question/Question';
 import styles from './QuestionReader.module.scss';
@@ -20,20 +20,21 @@ interface Props {
 	request: () => void;
 }
 
-const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props> = (
+const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Props> = (
 	{ questions, speed, setAllowQuery, setMsg, request, setTime, correct, setCorrect, setTimerActive },
 	ref
 ) => {
 	const [questionTokens, setQuestionTokens] = useState<string[]>([]);
 	const [idx, setIdx] = useState<number>(0);
 	const powerIndex = questionTokens.indexOf('(*)');
-	const questionRef = useRef<UsedQuestion[]>([]);
-	const [active, setActive] = useState<boolean>(false);
+	const [usedQuestions, setUsedQuestions] = useRecoilState(usedQuestionsState);
+	const [active, setActive] = useRecoilState(activeState);
 	const [questionFinished, setQuestionFinished] = useState<boolean>(false);
 	const [answering, setAnswering] = useRecoilState(answeringState);
 	const [userAnswer, setUserAnswer] = useState<string>('');
-	const [questionIndex, setQuestionIndex] = useState<number>(0);
+	const [questionIndex, setQuestionIndex] = useRecoilState(questionIndexState);
 	const [tooltipShown, setTooltipShown] = useState<string>(null);
+	const [readingStart, setReadingStart] = useRecoilState(readingStartState);
 
 	useImperativeHandle(ref, () => ({
 		endQuestion: () => {
@@ -50,7 +51,7 @@ const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props>
 			setAnswering(false);
 			setQuestionIndex(0);
 			setUserAnswer('');
-			questionRef.current = [];
+			setUsedQuestions([]);
 		}
 	}));
 
@@ -75,7 +76,10 @@ const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props>
 							setUserAnswer('');
 							setQuestionIndex(questionIndex + 1);
 							setAllowQuery(false);
-							questionRef.current.push({ question: questions[questionIndex], buzzLocation: idx, hasPower: powerIndex !== -1, powerIndex, userAnswer });
+							setUsedQuestions([
+								...usedQuestions,
+								{ question: questions[questionIndex], buzzLocation: idx, hasPower: powerIndex !== -1, powerIndex, userAnswer }
+							]);
 						} else {
 							setMsg('No Questions Remaining!');
 						}
@@ -90,13 +94,15 @@ const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props>
 
 	useEffect(() => {
 		if (questions.length > 0) {
-			setIdx(0);
-			setQuestionTokens(questions[questionIndex].text.split(' '));
-			setActive(true);
-			setTimerActive(true);
-			setTime(questions[questionIndex].text.split(' ').length * speed + 5000);
+			if (readingStart) {
+				setActive(true);
+				setTimerActive(true);
+				setIdx(0);
+				setQuestionTokens(questions[questionIndex].text.split(' '));
+				setTime(questions[questionIndex].text.split(' ').length * speed + 5000);
+			}
 		}
-	}, [questionIndex, questions]);
+	}, [questionIndex, questions, readingStart]);
 
 	useEffect(() => {
 		const intervalID = setInterval(() => {
@@ -176,7 +182,7 @@ const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props>
 					}}
 				/>
 			)}
-			{questions.length > 0 && (
+			{questions.length > 0 && readingStart && (
 				<Question
 					powerText={
 						powerIndex === -1
@@ -196,6 +202,11 @@ const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props>
 					original={questions[questionIndex]}
 				/>
 			)}
+			{!readingStart && questions.length > 0 && (
+				<div className={styles.loaded}>
+					Questions Loaded! <button onClick={() => setReadingStart(true)}>Start!</button>
+				</div>
+			)}
 			{questionFinished && (
 				<div className={styles.text}>
 					<strong>Your Answer:</strong> {userAnswer}
@@ -207,7 +218,7 @@ const QuestionReader: React.RefForwardingComponent<QuestionReaderMethods, Props>
 					<strong>Answer:</strong> {questions[questionIndex].answer}
 				</div>
 			)}
-			{questionRef.current.map((prevQuestion, i) =>
+			{usedQuestions.map((prevQuestion, i) =>
 				prevQuestion.hasPower ? (
 					<CompletedQuestion
 						key={i}

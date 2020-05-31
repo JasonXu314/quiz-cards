@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { NextPage } from 'next';
+import Head from 'next/head';
 import Router from 'next/router';
 import { useEffect, useState } from 'react';
 import styles from '../../sass/Edit_id.module.scss';
@@ -10,16 +11,23 @@ const Page: NextPage<{}> = () => {
 
 	useEffect(() => {
 		const { _id } = Router.query;
-		document.title = `QuizCards - ${_id}`;
 		axios(`/api/cards/${_id}`).then((res) => setCard(res.data));
 	}, []);
 
 	return (
 		<div className={styles.main}>
 			{card === null ? (
-				<div>Loading...</div>
+				<div>
+					<Head>
+						<title>QuizCards</title>
+					</Head>
+					Loading...
+				</div>
 			) : (
 				<div className={styles.card}>
+					<Head>
+						<title>QuizCards - Editing {card._id}</title>
+					</Head>
 					<div className={styles.id}>
 						Editing: {card._id} by {card.author || 'N/A'}
 					</div>

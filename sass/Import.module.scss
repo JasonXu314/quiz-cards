@@ -1,9 +1,14 @@
+@use '../sass/mixins';
+@use '../sass/colors';
+
 .main {
 	display: grid;
-	grid-template: "title ." 1fr "cards sidebar" auto "spinner spinner" auto / 12fr 2fr;
+	grid-template: 'title .' 1fr 'cards sidebar' auto 'spinner spinner' auto / 12fr 2fr;
 
 	.title {
 		grid-area: title;
+		font-size: 2em;
+		padding: 0.1em;
 	}
 
 	.sidebar {
@@ -11,23 +16,73 @@
 		padding: 0.5em;
 		box-sizing: border-box;
 
+		hr {
+			margin: 1em 0.2em;
+		}
+
+		.spacer {
+			height: 1.25em;
+		}
+
 		.error {
 			color: red;
 		}
+
+		.import {
+			@include mixins.button-base(colors.$primary);
+		}
 	}
+
 	.cards {
 		grid-area: cards;
+
+		.hide {
+			height: 0;
+			width: 0;
+			opacity: 0;
+			overflow: hidden;
+		}
+
+		& > .button {
+			display: inline-block;
+			font-size: 2em;
+			font-family: Arial, Helvetica, sans-serif;
+			@include mixins.button-base(colors.$action);
+			margin-left: 1em;
+			border-radius: 6px;
+		}
+
+		.button.dragging {
+			background: none;
+			color: colors.$action;
+			border-width: 2px;
+		}
+
+		h3 {
+			margin-left: 0.5em;
+		}
 
 		.buttons {
 			display: flex;
 			flex-direction: row;
 			justify-content: flex-start;
+			padding: 0.25em 0.625em;
+
+			div {
+				font-size: 1.1em;
+				padding: 0.2em 0.6em;
+				margin: 0 0.1em;
+			}
+
+			.button {
+				@include mixins.button-base(colors.$secondary);
+			}
 		}
 	}
 
 	.loading {
 		grid-area: spinner;
-		
+
 		.spinner {
 			animation: spin 2500ms ease-in-out 0ms infinite;
 			border-radius: 50%;

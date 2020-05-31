@@ -124,3 +124,26 @@ export const catToSubcat = {
 		'Social Science': socialScienceTags,
 		Trash: trashTags
 	};
+
+export const difNumToString = {
+		1: '1 (Middle School)',
+		2: '2 (Easy High School)',
+		3: '3 (Regular High School)',
+		4: '4 (Hard High School)',
+		5: '5 (Nationals High School)',
+		6: '6 (Easy College)',
+		7: '7 (Regular College)',
+		8: '8 (Hard College)',
+		9: '9 (Open)'
+	},
+	difNumToTags = {
+		1: 'ms-r',
+		2: 'hs-e',
+		3: 'hs-r',
+		4: 'hs-h',
+		5: 'hs-n',
+		6: 'co-e',
+		7: 'co-r',
+		8: 'co-h',
+		9: 'op'
+	};

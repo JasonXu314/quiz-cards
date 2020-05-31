@@ -1,10 +1,12 @@
 import axios from 'axios';
+import Head from 'next/head';
 import Link from 'next/link';
 import { NextPage } from 'next/types';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import CardReader from '../components/CardReader/CardReader';
 import CategorySelection from '../components/CategorySelection';
+import DifficultySelection from '../components/DifficultySelection/DifficultySelection';
 import LimitSelector from '../components/LimitSelector';
 import ModeSelection from '../components/ModeSelection';
 import QuestionReader from '../components/QuestionReader/QuestionReader';
@@ -19,15 +21,19 @@ const reducer: React.Reducer<string[], string> = (categories, category) => {
 	return categories.includes(category) ? categories.filter((cat) => cat !== category) : [...categories, category];
 };
 
+const difReducer: React.Reducer<number[], number> = (difficulties, difficulty) => {
+	return difficulties.includes(difficulty) ? difficulties.filter((dif) => dif !== difficulty) : [...difficulties, difficulty];
+};
+
 const Index: NextPage<{}> = () => {
 	const [categories, categoryDispatch] = useReducer(reducer, []);
 	const [subcategories, subcategoryDispatch] = useReducer(reducer, []);
+	const [difficulties, difficultyDispatch] = useReducer(difReducer, [3]);
 	const [mode, setMode] = useState<AppMode>('card');
 	const [limit, setLimit] = useState<number>(50);
 	const [cards, setCards] = useState<Card[]>([]);
 	const [questions, setQuestions] = useState<Question[]>([]);
 	const [speed, setSpeed] = useState<number>(120);
-	const [difficulty, setDifficulty] = useState<number>(3);
 	const [useLimit, setUseLimit] = useState<boolean>(false);
 	const [timeDisplay, setTimeDisplay] = useState<number>(0);
 	const [error, setError] = useState<string>(null);
@@ -50,7 +56,7 @@ const Index: NextPage<{}> = () => {
 							categories,
 							limit,
 							subcategories,
-							difficulty,
+							difficulties,
 							internal: true
 						})
 					)
@@ -88,12 +94,15 @@ const Index: NextPage<{}> = () => {
 					});
 				break;
 		}
-	}, [mode, questions.length, categories, subcategories, useLimit, limit]);
+	}, [mode, questions.length, categories, subcategories, useLimit, limit, difficulties]);
 
 	const keypressHandler = useCallback(
 		(evt: KeyboardEvent) => {
 			if (evt.code === 'KeyL' && allowQuery) {
-				readerRef.current.performReset();
+				if (readerRef.current) {
+					readerRef.current.performReset();
+					setTimeDisplay(0);
+				}
 				request();
 			}
 		},
@@ -106,6 +115,9 @@ const Index: NextPage<{}> = () => {
 		}
 		if (localStorage.getItem('subcategories')) {
 			JSON.parse(localStorage.getItem('subcategories')).forEach((subcategory) => subcategoryDispatch(subcategory));
+		}
+		if (localStorage.getItem('difficulties')) {
+			JSON.parse(localStorage.getItem('difficulties')).forEach((difficulty) => difficultyDispatch(difficulty));
 		}
 		if (localStorage.getItem('mode')) {
 			const persistMode = localStorage.getItem('mode') as AppMode;
@@ -124,6 +136,7 @@ const Index: NextPage<{}> = () => {
 	useEffect(() => {
 		localStorage.setItem('categories', JSON.stringify(categories));
 		localStorage.setItem('subcategories', JSON.stringify(subcategories));
+		localStorage.setItem('difficulties', JSON.stringify(difficulties));
 		localStorage.setItem('mode', mode);
 
 		if (mode === 'card') {
@@ -151,10 +164,13 @@ const Index: NextPage<{}> = () => {
 
 	return (
 		<div className={styles.main}>
+			<Head>
+				<title>QuizCards</title>
+			</Head>
 			<div className={styles.title}>QuizCards</div>
 			<div className={styles.sidebar}>
 				<h3>{timeDisplay.toFixed(2)} s</h3>
-				{questions.length > 0 ? (
+				{questions.length > 0 || mode === 'card' ? (
 					<Timer
 						active={timerActive}
 						time={time}
@@ -186,22 +202,7 @@ const Index: NextPage<{}> = () => {
 					<hr id="separator" />
 					<LimitSelector setLimit={setLimit} limit={limit} mode={mode} useLimit={useLimit} setUseLimit={setUseLimit} />
 					{mode === 'read' && <SpeedSelector setSpeed={setSpeed} speed={speed} />}
-					{mode === 'read' && (
-						<div>
-							<div>Difficulty:</div>
-							<select onChange={(evt) => setDifficulty(parseInt(evt.target.value))} value={difficulty}>
-								<option value={1}>1 (Middle School)</option>
-								<option value={2}>2 (Easy High School)</option>
-								<option value={3}>3 (Regular High School)</option>
-								<option value={4}>4 (Hard High School)</option>
-								<option value={5}>5 (Nationals High School)</option>
-								<option value={6}>6 (Easy College)</option>
-								<option value={7}>7 (Regular College)</option>
-								<option value={8}>8 (Hard College)</option>
-								<option value={9}>9 (Open)</option>
-							</select>
-						</div>
-					)}
+					{mode === 'read' && <DifficultySelection onChange={(evt) => difficultyDispatch(parseInt(evt.target.value))} difficulties={difficulties} />}
 				</form>
 				<div>
 					<Link href="/create">

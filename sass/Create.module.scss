@@ -28,32 +28,12 @@
 			outline: none;
 		}
 
+		textarea.last {
+			margin-bottom: 1em;
+		}
+
 		.error {
 			color: red;
-		}
-
-		input {
-			padding: 0.5em 0.75em;
-			outline: none;
-			border: 1px solid #cccccc;
-			border-radius: 6px;
-			width: 20em;
-			display: block;
-			margin-top: 1.5em;
-		}
-
-		.label {
-			color: rgb(117, 117, 117);
-			position: absolute;
-			font-size: calc(40px / 3);
-			font-family: Arial, Helvetica, sans-serif;
-			transform: translate(1em, -1.75em);
-			transition: transform 75ms linear;
-		}
-
-		input:focus + .label,
-		input:not([value='']) + .label {
-			transform: translate(-0.1em, -3.5em) scale(0.9);
 		}
 
 		button {

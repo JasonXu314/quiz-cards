@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { NextPage } from 'next';
+import Head from 'next/head';
 import Link from 'next/link';
 import { useState } from 'react';
 import styles from '../../sass/EditIndex.module.scss';
@@ -14,6 +15,7 @@ const Index: NextPage<{}> = () => {
 
 	return (
 		<div className={styles.main}>
+			<Head>QuizCards - Edit</Head>
 			<div className={styles.title}>QuizCards</div>
 
 			<div className={styles.sidebar}>

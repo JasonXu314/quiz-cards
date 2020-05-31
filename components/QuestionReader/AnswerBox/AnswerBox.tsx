@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import styles from '../sass/AnswerBox.module.scss';
-import Pencil from './Pencil';
+import Pencil from '../../Pencil';
+import styles from './AnswerBox.module.scss';
 
 interface Props {
 	value: string;

@@ -3,7 +3,7 @@
 	border: 2px solid black;
 	padding: 0.5em;
 	display: grid;
-	grid-template: "hint category" "answer subcategory" / 1fr 1fr;
+	grid-template: 'hint category' 'answer subcategory' 'answer .' 'author .' / 8fr 2fr;
 
 	.hint {
 		grid-area: hint;
@@ -19,5 +19,9 @@
 
 	.subcategory {
 		grid-area: subcategory;
+	}
+
+	.author {
+		grid-area: author;
 	}
 }

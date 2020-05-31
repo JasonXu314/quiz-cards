@@ -1,22 +1,24 @@
 import axios from 'axios';
-import { GetServerSideProps, NextPage } from "next";
+import { GetServerSideProps, NextPage } from 'next';
+import Head from 'next/head';
 import Link from 'next/link';
-import { useReducer, useState } from "react";
-import ImportCard from '../components/ImportCard';
+import { useReducer, useState } from 'react';
+import ImportCard from '../components/ImportCard/ImportCard';
+import StyledInput from '../components/StyledInput/StyledInput';
 import styles from '../sass/Import.module.scss';
 import { categories, categoryTags, catToSubcat, catToTags } from '../util/constants';
-import { processCards } from "../util/util";
+import { processCards } from '../util/util';
 
 const reducer: React.Reducer<ProtoCard[], ImportCardReducerAction> = (cards, action) => {
 	const newCards = [...cards];
 
 	switch (action.type) {
-		case ('SET'):
+		case 'SET':
 			return action.cards;
-		case ('CATEGORY'):
+		case 'CATEGORY':
 			newCards[action.i].category = action.category;
 			return newCards;
-		case('SUBCATEGORY'):
+		case 'SUBCATEGORY':
 			newCards[action.i].subcategory = action.subcategory;
 			return newCards;
 	}
@@ -30,81 +32,160 @@ const Import: NextPage<{ url: string }> = ({ url }) => {
 	const [error, setError] = useState(null);
 	const [page, setPage] = useState<number>(0);
 	const [msg, setMsg] = useState<string>('');
-	
-	return (
-		<div className = {styles.main}>
-			<div className = {styles.title}>QuizCards</div>
+	const [author, setAuthor] = useState<string>('');
+	const [dragging, setDragging] = useState<boolean>(false);
 
-			<div className = {styles.sidebar}>
-				{cards.length === 0 ? <>
-					<h4>Category:</h4>
-					<select onChange = {(evt) => {
-						setCategory(evt.target.value);
-						setSubcategory('');
-					}} value = {category}>
-						{categories.map((category, i) => <option key = {categoryTags[i]} value = {category}>{category}</option>)}
-					</select>
-					{category !== '' && <h4>Subcategory:</h4>}
-					<select onChange = {(evt) => setSubcategory(evt.target.value)} value = {subcategory}>
-						<option value = ""></option>
-						{catToSubcat[category].map((subcat: string, i: number) => <option key = {catToTags[category][i]} value = {subcat}>{subcat}</option>)}
-					</select>
-				</> : <button onClick = {() => {
-					axios.post('/api/cards/import', { cards })
-						.then((res) => {
-							setMsg(res.data);
-							dispatch({ type: 'SET', cards: [] });
-						})
-						.catch((err) => {
-							console.log(err.response);
-							setError(err.response);
-						});
-				}}>Import!</button>}
+	return (
+		<div className={styles.main}>
+			<Head>
+				<title>QuizCards - Import</title>
+			</Head>
+			<div className={styles.title}>QuizCards</div>
+			<div className={styles.sidebar}>
+				{cards.length === 0 ? (
+					<>
+						<h4>Category:</h4>
+						<select
+							onChange={(evt) => {
+								setCategory(evt.target.value);
+								setSubcategory('');
+							}}
+							value={category}>
+							{categories.map((category, i) => (
+								<option key={categoryTags[i]} value={category}>
+									{category}
+								</option>
+							))}
+						</select>
+						{category !== '' && <h4>Subcategory:</h4>}
+						<select onChange={(evt) => setSubcategory(evt.target.value)} value={subcategory}>
+							<option value=""></option>
+							{catToSubcat[category].map((subcat: string, i: number) => (
+								<option key={catToTags[category][i]} value={subcat}>
+									{subcat}
+								</option>
+							))}
+						</select>
+						<div className={styles.spacer} />
+						<StyledInput onChange={(evt) => setAuthor(evt.target.value)} value={author} placeholder="Your Name (optional)" />
+					</>
+				) : (
+					<button
+						onClick={() => {
+							axios
+								.post('/api/cards/import', { cards })
+								.then((res) => {
+									setMsg(res.data);
+									dispatch({ type: 'SET', cards: [] });
+								})
+								.catch((err) => {
+									console.log(err.response);
+									setError(err.response);
+								});
+						}}
+						className={styles.import}>
+						Import!
+					</button>
+				)}
+				<hr />
 				<div>
 					<h3>Instructions:</h3>
 					<p>In Anki, navigate to the overview screen containing all your decks</p>
 					<p>Click the gear next to the desired deck and hit export</p>
 					<p>Set the Export Format to "Cards in Plain Text (*.txt)</p>
 				</div>
+				<hr />
 				<div>
-					<Link href = "/"><a>Home</a></Link>
+					<Link href="/">
+						<a>Home</a>
+					</Link>
 				</div>
 				<div>
-					<Link href = "/create"><a>Create new cards</a></Link>
+					<Link href="/create">
+						<a>Create new cards</a>
+					</Link>
 				</div>
-				{error && <div className = {styles.error}>{error}</div>}
+				{error && <div className={styles.error}>{error}</div>}
 			</div>
-			
-			<div className = {styles.cards}>
-				{cards.length === 0 && !loading ? <input type = "file" onChange = {(evt) => {
-						setLoading(true);
-						Array.from(evt.target.files).forEach((file) => {
-							file.text().then((text) => processCards(text, category, subcategory))
-								.then((cards) => {
-									dispatch({ 
-										type: 'SET',
-										cards
-									});
-									setLoading(false);
+
+			<div className={styles.cards}>
+				{cards.length === 0 && !loading ? (
+					<>
+						<input
+							type="file"
+							onChange={(evt) => {
+								setLoading(true);
+								Array.from(evt.target.files).forEach((file) => {
+									file.text()
+										.then((text) => processCards(text, category, subcategory, author))
+										.then((cards) => {
+											dispatch({
+												type: 'SET',
+												cards
+											});
+											setLoading(false);
+										});
 								});
-						});
-					}} /> : <>
-						<div className = {styles.buttons}>
-							<button onClick = {() => setPage(page - 1)} disabled = {page === 0}>&lt; Back</button>
+							}}
+							id="file-input"
+							className={styles.hide}
+						/>
+						<label
+							htmlFor="file-input"
+							className={styles.button + (dragging ? ' ' + styles.dragging : '')}
+							onDragEnter={() => setDragging(true)}
+							onDragLeave={() => setDragging(false)}
+							onDrop={(evt) => {
+								evt.preventDefault();
+								setDragging(false);
+								setLoading(true);
+								Array.from(evt.dataTransfer.files).forEach((file) => {
+									file.text()
+										.then((text) => processCards(text, category, subcategory, author))
+										.then((cards) => {
+											dispatch({
+												type: 'SET',
+												cards
+											});
+											setLoading(false);
+										});
+								});
+							}}
+							onDragOver={(evt) => evt.preventDefault()}>
+							Select File
+						</label>
+					</>
+				) : (
+					<>
+						<div className={styles.buttons}>
+							<button className={styles.button} onClick={() => setPage(page - 1)} disabled={page === 0}>
+								&lt; Back
+							</button>
 							<div>Page {page + 1}</div>
-							<button onClick = {() => setPage(page + 1)} disabled = {page === Math.floor(cards.length/100)}>Next &gt;</button>
+							<button className={styles.button} onClick={() => setPage(page + 1)} disabled={page === Math.floor(cards.length / 100)}>
+								Next &gt;
+							</button>
 						</div>
-						{cards.slice(page * 100, (page + 1) * 100).map((card, i) => <ImportCard key = {i} card = {card} dispatch = {dispatch} index = {i} />)}
-						<div className = {styles.buttons}>
-							<button onClick = {() => setPage(page - 1)} disabled = {page === 0}>&lt; Back</button>
+						{cards.slice(page * 100, (page + 1) * 100).map((card, i) => (
+							<ImportCard key={i} card={card} dispatch={dispatch} index={i} />
+						))}
+						<div className={styles.buttons}>
+							<button className={styles.button} onClick={() => setPage(page - 1)} disabled={page === 0}>
+								&lt; Back
+							</button>
 							<div>Page {page + 1}</div>
-							<button onClick = {() => setPage(page + 1)} disabled = {page === Math.floor(cards.length/100)}>Next &gt;</button>
+							<button className={styles.button} onClick={() => setPage(page + 1)} disabled={page === Math.floor(cards.length / 100)}>
+								Next &gt;
+							</button>
 						</div>
-					</>}
+					</>
+				)}
 				{msg !== '' && <h3>{msg}</h3>}
 			</div>
-			<div className = {styles.loading}>
-				<div><img className = {styles.spinner} src = {url} alt = "Loading..." hidden = {!loading} /></div>
+			<div className={styles.loading}>
+				<div>
+					<img className={styles.spinner} src={url} alt="Loading..." hidden={!loading} />
+				</div>
 				<div>{loading && 'Loading, Plz wait...'}</div>
 			</div>
 		</div>
@@ -119,6 +200,6 @@ export const getServerSideProps: GetServerSideProps = async () => {
 			url: imgUrls[Math.floor(Math.random() * 4)]
 		}
 	};
-}
+};
 
 export default Import;

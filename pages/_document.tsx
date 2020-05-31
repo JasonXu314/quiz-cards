@@ -24,10 +24,7 @@ class MyDocument extends Document<{ path: string }> {
 
 		return (
 			<Html lang="en">
-				<head>
-					<Head />
-					<title>QuizCards - {displayPath}</title>
-				</head>
+				<Head />
 				<body>
 					<Main />
 					<NextScript />

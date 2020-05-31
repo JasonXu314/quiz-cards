@@ -1,4 +1,5 @@
 @use '../../sass/mixins';
+@use '../../sass/colors';
 
 .main {
 	.text {
@@ -34,15 +35,31 @@
 
 	.row {
 		.primary {
-			@include mixins.button-base(#49afcd);
+			@include mixins.button-base(colors.$primary);
 		}
 
 		.secondary {
-			@include mixins.button-base(white);
+			@include mixins.button-base(colors.$secondary);
 		}
 
 		.action {
-			@include mixins.button-base(#ee5f5b);
+			@include mixins.button-base(colors.$action);
+		}
+	}
+
+	.loaded {
+		width: fit-content;
+		font-size: 3em;
+		margin: auto;
+		position: relative;
+		top: 5em;
+
+		button {
+			@include mixins.button-base(colors.$primary);
+			width: fit-content;
+			margin: auto;
+			display: block;
+			font-size: 0.5em;
 		}
 	}
 }

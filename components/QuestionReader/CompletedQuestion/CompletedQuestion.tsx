@@ -20,12 +20,9 @@ const CompletedQuestion: React.FC<Props> = ({ powerText = [], normalText = [], h
 			<div className={styles.info + (expanded ? '' : ' ' + styles.collapsed)} onClick={() => setExpanded(!expanded)}>
 				<div>
 					{original.category.name}, {original.subcategory.name}
-				</div>
-				<div>{original.tournament.difficulty}</div>
-				<div>{original.tournament.name}</div>
-				<div>Round: {original.round}</div>
-				<div>Your Answer: {answer}</div>
-				<div>Answer: {original.answer}</div>
+				</div>{' '}
+				| <div>{original.tournament.difficulty}</div> | <div>{original.tournament.name}</div> | <div>Round: {original.round}</div> |
+				<div>Your Answer: {answer}</div> | <div>Answer: {original.answer}</div>
 			</div>
 			<div className={styles.question + (expanded ? '' : ' ' + styles.collapsed)}>
 				{hasPower ? (

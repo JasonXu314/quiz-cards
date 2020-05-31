@@ -12,7 +12,10 @@ export function compileQuestionRequest(options: QuestionRequestConfig) {
 		let subcategories = '&subcategories=';
 		subcategories += options.subcategories.join(',');
 
-		return req + categories + subcategories + `&limit=${options.limit}` + `&difficulty=${options.difficulty}`;
+		let difficulties = '&difficulties=';
+		difficulties += options.difficulties.join(',');
+
+		return req + categories + subcategories + difficulties + `&limit=${options.limit}`;
 	} else {
 		const queryString = qs.stringify(
 			{
@@ -21,7 +24,7 @@ export function compileQuestionRequest(options: QuestionRequestConfig) {
 					filters: {
 						category: options.categories.map(convertCategory),
 						subcategory: options.subcategories.map(convertSubcategory),
-						difficulty: [difficultyMap[options.difficulty]]
+						difficulty: [...options.difficulties.map((difficulty) => difficultyMap[difficulty])]
 					},
 					limit: true,
 					random: options.limit
@@ -67,13 +70,14 @@ export function convertSubcategory(subcategory: string) {
 	return subcategoryMap[subcategory];
 }
 
-export async function processCards(text: string, category: string, subcategory: string): Promise<ProtoCard[]> {
+export async function processCards(text: string, category: string, subcategory: string, author: string): Promise<ProtoCard[]> {
 	return new Promise((resolve) => {
 		const raw = text.split(/;?\n/);
 		raw.pop();
 		const cards = raw
 			.map((card) => card.split('\t'))
 			.map((pair) => ({
+				author,
 				category,
 				subcategory,
 				hint: pair[0],
