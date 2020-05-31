@@ -4,6 +4,8 @@ declare module 'recoil' {
 	declare type Mutator<T> = (param: T) => void;
 	declare type Reset = () => void;
 
+	declare class RecoilRoot extends React.Component {}
+
 	declare interface RecoilAtom<T> {
 		key: string;
 	}
