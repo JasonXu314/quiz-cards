@@ -316,7 +316,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 
 	return {
 		props: {
-			settings: JSON.parse(cookies.settings) || null
+			settings: cookies.settings ? JSON.parse(cookies.settings) : null
 		}
 	};
 };
