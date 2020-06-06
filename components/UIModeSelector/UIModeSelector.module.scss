@@ -1,0 +1,15 @@
+.main {
+	display: grid;
+	grid-template-rows: 1fr 1fr;
+
+	.row {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+
+		.group {
+			input {
+				margin-right: 0.2em;
+			}
+		}
+	}
+}

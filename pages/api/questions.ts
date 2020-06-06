@@ -2,7 +2,7 @@ import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { compileQuestionRequest } from '../../util/util';
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+export default async (req: NextApiRequest, res: NextApiResponse<QuestionResponse | string>) => {
 	const preFormatReq = {
 		categories: null,
 		limit: null,
@@ -39,10 +39,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 		return;
 	}
 
-	const questions = (await axios(compileQuestionRequest(preFormatReq))).data;
+	const data = (await axios.get<QuizDBResponse>(compileQuestionRequest(preFormatReq))).data.data;
 
-	res.status(200).json(questions);
+	res.status(200).json({ questions: data.tossups, num_questions_found: data.num_tossups_found });
 };
 
-`https://www.quizdb.org/api/random?search%5Bquery%5D=&search%5Bfilters%5D%5Bcategory%5D%5B%5D=17&search%5Bfilters%5D%5Bsubcategory%5D%5B%5D=23&search%5Bfilters%5D%5Bdifficulty%5D%5B%5D=regular_high_school&search%5Blimit%5D=true&search%5Brandom%5D=50`;
 `https://www.quizdb.org/api/random?search%5Bquery%5D=&search%5Bfilters%5D%5Bcategory%5D%5B%5D=17&search%5Bfilters%5D%5Bsubcategory%5D%5B%5D=23&search%5Bfilters%5D%5Bdifficulty%5D%5B%5D=regular_high_school&search%5Bfilters%5D%5Bdifficulty%5D%5B%5D=hard_high_school&search%5Blimit%5D=true&search%5Brandom%5D=50`;

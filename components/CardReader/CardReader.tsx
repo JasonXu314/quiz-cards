@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import StyledButton from '../StyledButton/StyledButton';
 import Card from './Card/Card';
 import styles from './CardReader.module.scss';
 
@@ -10,7 +11,6 @@ interface Props {
 const CardReader: React.FC<Props> = ({ cards, request }) => {
 	const [cardIndex, setCardIndex] = useState<number>(0);
 	const [cardFlipped, setCardFlipped] = useState<boolean>(false);
-	const [tooltipShown, setTooltipShown] = useState<string>(null);
 
 	const keypressHandler = useCallback(
 		(evt: KeyboardEvent) => {
@@ -54,11 +54,11 @@ const CardReader: React.FC<Props> = ({ cards, request }) => {
 	return (
 		<div className={styles.main}>
 			<div className={styles.row}>
-				<button className={styles.secondary} onClick={request} onMouseEnter={() => setTooltipShown('load')} onMouseLeave={() => setTooltipShown(null)}>
+				<StyledButton type="secondary" onClick={request} tooltip="Hotkey: L" size="normal">
 					Load Cards
-				</button>
-				<button
-					className={styles.secondary}
+				</StyledButton>
+				<StyledButton
+					type="secondary"
 					onClick={() => {
 						if (cardFlipped) {
 							setCardFlipped(false);
@@ -70,12 +70,12 @@ const CardReader: React.FC<Props> = ({ cards, request }) => {
 						}
 					}}
 					disabled={cards.length === 0}
-					onMouseEnter={() => setTooltipShown('back')}
-					onMouseLeave={() => setTooltipShown(null)}>
+					tooltip="Hotkey: B"
+					size="normal">
 					&lt; Back
-				</button>
-				<button
-					className={styles.primary}
+				</StyledButton>
+				<StyledButton
+					type="primary"
 					onClick={() => {
 						if (cardFlipped) {
 							setCardFlipped(false);
@@ -87,15 +87,12 @@ const CardReader: React.FC<Props> = ({ cards, request }) => {
 						}
 					}}
 					disabled={cards.length === 0}
-					onMouseEnter={() => setTooltipShown('next')}
-					onMouseLeave={() => setTooltipShown(null)}>
+					tooltip="Hotkey: N"
+					size="normal">
 					Next &gt;
-				</button>
+				</StyledButton>
 			</div>
 			{cards.length > 0 && <Card flipped={cardFlipped} setFlipped={setCardFlipped} card={cards[cardIndex]} />}
-			<div className={tooltipShown === 'load' ? `${styles.tooltip} ${styles.load} ${styles.shown}` : `${styles.tooltip} ${styles.load}`}>Hotkey: L</div>
-			<div className={tooltipShown === 'back' ? `${styles.tooltip} ${styles.back} ${styles.shown}` : `${styles.tooltip} ${styles.back}`}>Hotkey: B</div>
-			<div className={tooltipShown === 'next' ? `${styles.tooltip} ${styles.next} ${styles.shown}` : `${styles.tooltip} ${styles.next}`}>Hotkey: N</div>
 		</div>
 	);
 };

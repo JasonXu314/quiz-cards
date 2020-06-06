@@ -1,0 +1,41 @@
+@use '../../sass/colors';
+@use '../../sass/mixins';
+
+.main {
+	position: relative;
+	overflow: visible;
+
+	@include mixins.tooltip;
+
+	.tooltip {
+		left: 50%;
+		top: 50%;
+		width: max-content;
+	}
+
+	.button {
+		position: relative;
+
+		&.action {
+			@include mixins.button-base(colors.$action);
+		}
+
+		&.primary {
+			@include mixins.button-base(colors.$primary);
+		}
+
+		&.secondary {
+			@include mixins.button-base(colors.$secondary);
+		}
+
+		&.big {
+			font-size: 24px;
+			border-radius: 5px !important;
+		}
+
+		&.center {
+			left: 50%;
+			transform: translate(-50%);
+		}
+	}
+}

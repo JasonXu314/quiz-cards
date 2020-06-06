@@ -1,14 +1,15 @@
 import styles from '../sass/LimitSelector.module.scss';
 
 interface Props {
-	setLimit: React.Dispatch<React.SetStateAction<number>>;
+	onLimitChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
+	onLimitBlur: (evt: React.FocusEvent<HTMLInputElement>) => void;
+	onUseLimitChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
 	limit: number;
-	setUseLimit: React.Dispatch<React.SetStateAction<boolean>>;
 	useLimit: boolean;
 	mode: AppMode;
 }
 
-const LimitSelector: React.FC<Props> = ({ setLimit, limit, mode, useLimit, setUseLimit }) => {
+const LimitSelector: React.FC<Props> = ({ limit, mode, useLimit, onUseLimitChange, onLimitChange, onLimitBlur }) => {
 	return (
 		<div className={styles.main}>
 			{mode === 'read' ? (
@@ -16,30 +17,13 @@ const LimitSelector: React.FC<Props> = ({ setLimit, limit, mode, useLimit, setUs
 					<label className={styles.limit} htmlFor="limit">
 						Question Limit:
 					</label>
-					<input
-						className={styles.limit}
-						onChange={(evt) => {
-							if (/\d*/.test(evt.target.value)) {
-								setLimit(evt.target.value === '' ? NaN : parseInt(evt.target.value));
-							}
-						}}
-						onBlur={(evt) => {
-							if (evt.target.value === '') {
-								setLimit(1);
-							} else if (parseInt(evt.target.value) > 150) {
-								setLimit(150);
-							}
-						}}
-						id="limit"
-						type="text"
-						value={Number.isNaN(limit) ? '' : limit}
-					/>
+					<input className={styles.limit} onChange={onLimitChange} onBlur={onLimitBlur} id="limit" type="text" value={Number.isNaN(limit) ? '' : limit} />
 				</>
 			) : (
 				<>
 					<label>Limit Cards?</label>
 					<label className={useLimit ? `${styles.switch} ${styles.checked}` : `${styles.switch}`}>
-						<input type="checkbox" checked={useLimit} onChange={(evt) => setUseLimit(evt.target.checked)} />
+						<input type="checkbox" checked={useLimit} onChange={onUseLimitChange} />
 						<span></span>
 					</label>
 					<br />
@@ -48,18 +32,8 @@ const LimitSelector: React.FC<Props> = ({ setLimit, limit, mode, useLimit, setUs
 					</label>
 					<input
 						className={styles.limit}
-						onChange={(evt) => {
-							if (/\d*/.test(evt.target.value)) {
-								setLimit(evt.target.value === '' ? NaN : parseInt(evt.target.value));
-							}
-						}}
-						onBlur={(evt) => {
-							if (evt.target.value === '') {
-								setLimit(1);
-							} else if (parseInt(evt.target.value) > 150) {
-								setLimit(250);
-							}
-						}}
+						onChange={onLimitChange}
+						onBlur={onLimitBlur}
 						id="limit"
 						type="text"
 						value={Number.isNaN(limit) ? '' : limit}

@@ -1,4 +1,4 @@
-import styles from '../sass/PowerStar.module.scss';
+import styles from './PowerStar.module.scss';
 
 interface Props {
 	height: number;

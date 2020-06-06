@@ -1,10 +1,10 @@
 import { useEffect, useReducer } from 'react';
-import { categories as cats, categoryTags, catToSubcat, catToTags } from '../util/constants';
-import ChevronDown from './ChevronDown';
-import ChevronUp from './ChevronUp';
+import { categories as cats, categoryTags, catToSubcat, catToTags } from '../../util/constants';
+import ChevronDown from '../ChevronDown';
+import ChevronUp from '../ChevronUp';
 
 interface Props {
-	dispatch: React.Dispatch<string>;
+	onChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
 	categories: string[];
 	subcategories: string[];
 }
@@ -16,10 +16,8 @@ const reducer: React.Reducer<{ [key: string]: boolean }, string> = (map, categor
 	};
 };
 
-const initialState = Object.fromEntries(cats.map((category) => [category, false]));
-
-const SubcategorySelection: React.FC<Props> = ({ dispatch, categories, subcategories }) => {
-	const [expanded, expandedDispatch] = useReducer(reducer, initialState);
+const SubcategorySelection: React.FC<Props> = ({ onChange, categories, subcategories }) => {
+	const [expanded, expandedDispatch] = useReducer(reducer, Object.fromEntries(cats.map((category) => [category, false])));
 
 	useEffect(() => {
 		const changed = Object.entries(expanded).filter(([key, exp]) => !categories.includes(key) && exp);
@@ -48,7 +46,7 @@ const SubcategorySelection: React.FC<Props> = ({ dispatch, categories, subcatego
 							{catToSubcat[category].map((subcategory: string, i: number) => (
 								<div key={catToTags[category][i]}>
 									<input
-										onChange={() => dispatch(subcategory)}
+										onChange={onChange}
 										type="checkbox"
 										id={catToTags[category][i]}
 										value={subcategory}

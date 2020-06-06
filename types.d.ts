@@ -1,4 +1,4 @@
-interface Question {
+interface TossupQuestion {
 	id: number;
 	text: string;
 	answer: string;
@@ -14,7 +14,7 @@ interface Question {
 	formatted_answer: string;
 	wikipedia_url: string | null;
 	url: string;
-	type: 'tossup' | 'bonus';
+	type: 'tossup';
 	tournament: {
 		id: number;
 		year: number;
@@ -44,8 +44,79 @@ interface Question {
 	};
 }
 
+interface BonusQuestion {
+	id: number;
+	number: number;
+	round: string;
+	category_id: number;
+	subcategory_id: number;
+	quinterest_id: number | null;
+	tournament_id: number;
+	leadin: string;
+	created_at: string;
+	updated_at: string;
+	texts: [string, string, string];
+	answers: [string, string, string];
+	formatted_texts: [string, string, string];
+	formatted_answers: [string, string, string];
+	wikipedia_urls: [string | null, string | null, string | null];
+	url: string;
+	type: 'bonus';
+	tournament: {
+		id: number;
+		year: number;
+		name: string;
+		address: string;
+		quality: string;
+		type: null;
+		link: string;
+		type: string | null;
+		link: string;
+		created_at: string;
+		updated_at: string;
+		difficulty: string;
+		difficulty_num: number;
+		url: string;
+	};
+	category: {
+		id: number;
+		name: string;
+		created_at: string;
+		updated_at: string;
+		url: string;
+	};
+	subcategory: {
+		id: number;
+		name: string;
+		created_at: string;
+		updated_at: string;
+		url: string;
+	};
+}
+
+interface QuizDBResponse {
+	data: {
+		num_tossups_found: number;
+		num_tossups_shown: number;
+		tossups: TossupQuestion[];
+		num_bonuses_found: number;
+		num_bonuses_shown: number;
+		bonuses: BonusQuestion[];
+	};
+}
+
+interface CardResponse {
+	cards: Card[];
+	num_cards_found: number;
+}
+
+interface QuestionResponse {
+	questions: TossupQuestion[];
+	num_questions_found: number;
+}
+
 interface UsedQuestion {
-	question: Question;
+	question: TossupQuestion;
 	buzzLocation: number;
 	hasPower: boolean;
 	powerIndex: number;
@@ -84,6 +155,7 @@ interface CardRequestConfig {
 }
 
 type AppMode = 'read' | 'card';
+type UIMode = 'protobowl' | 'tabled';
 
 type ImportCardReducerAction =
 	| { type: 'SET'; cards: ProtoCard[] }
@@ -94,3 +166,25 @@ interface QuestionReaderMethods {
 	endQuestion: () => void;
 	performReset: () => void;
 }
+
+interface Settings {
+	categories: string[];
+	subcategories: string[];
+	difficulties: number[];
+	mode: AppMode;
+	ui_mode: UIMode;
+	useLimit: boolean;
+	limit: number;
+	speed: number;
+}
+
+type SettingsAction =
+	| { type: 'LOAD'; settings: Settings }
+	| { type: 'TOGGLE_CATEGORY'; category: string }
+	| { type: 'TOGGLE_SUBCATEGORY'; subcategory: string }
+	| { type: 'SET_MODE'; mode: AppMode }
+	| { type: 'TOGGLE_DIFFICULTY'; difficulty: number }
+	| { type: 'SET_LIMIT'; limit: number }
+	| { type: 'SET_SPEED'; speed: number }
+	| { type: 'SET_USE_LIMIT'; useLimit: boolean }
+	| { type: 'SET_UI_MODE'; mode: UIMode };

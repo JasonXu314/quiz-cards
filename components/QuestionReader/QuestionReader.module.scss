@@ -19,32 +19,9 @@
 		font-weight: bold;
 	}
 
-	@include mixins.tooltip;
-
-	.buzz {
-		left: 158.8671875px;
-	}
-
-	.load {
-		left: 60.34375px;
-	}
-
-	.next {
-		left: 230.15625px;
-	}
-
 	.row {
-		.primary {
-			@include mixins.button-base(colors.$primary);
-		}
-
-		.secondary {
-			@include mixins.button-base(colors.$secondary);
-		}
-
-		.action {
-			@include mixins.button-base(colors.$action);
-		}
+		display: flex;
+		flex-direction: row;
 	}
 
 	.loaded {
@@ -53,13 +30,5 @@
 		margin: auto;
 		position: relative;
 		top: 5em;
-
-		button {
-			@include mixins.button-base(colors.$primary);
-			width: fit-content;
-			margin: auto;
-			display: block;
-			font-size: 0.5em;
-		}
 	}
 }

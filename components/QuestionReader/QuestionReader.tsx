@@ -3,13 +3,14 @@ import { useRecoilState } from 'recoil';
 import { activeState, answeringState, questionIndexState, readingStartState, usedQuestionsState } from '../../util/atoms';
 import { checkAns } from '../../util/util';
 import Bell from '../Bell';
+import StyledButton from '../StyledButton/StyledButton';
 import AnswerBox from './AnswerBox/AnswerBox';
 import CompletedQuestion from './CompletedQuestion/CompletedQuestion';
 import Question from './Question/Question';
 import styles from './QuestionReader.module.scss';
 
 interface Props {
-	questions: Question[];
+	questions: TossupQuestion[];
 	speed: number;
 	setAllowQuery: React.Dispatch<React.SetStateAction<boolean>>;
 	setMsg: React.Dispatch<React.SetStateAction<string>>;
@@ -18,10 +19,11 @@ interface Props {
 	setCorrect: React.Dispatch<React.SetStateAction<boolean>>;
 	setTimerActive: React.Dispatch<React.SetStateAction<boolean>>;
 	request: () => void;
+	ui_mode: UIMode;
 }
 
 const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Props> = (
-	{ questions, speed, setAllowQuery, setMsg, request, setTime, correct, setCorrect, setTimerActive },
+	{ questions, speed, setAllowQuery, setMsg, request, setTime, correct, setCorrect, setTimerActive, ui_mode },
 	ref
 ) => {
 	const [questionTokens, setQuestionTokens] = useState<string[]>([]);
@@ -33,7 +35,6 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 	const [answering, setAnswering] = useRecoilState(answeringState);
 	const [userAnswer, setUserAnswer] = useState<string>('');
 	const [questionIndex, setQuestionIndex] = useRecoilState(questionIndexState);
-	const [tooltipShown, setTooltipShown] = useState<string>(null);
 	const [readingStart, setReadingStart] = useRecoilState(readingStartState);
 
 	useImperativeHandle(ref, () => ({
@@ -138,23 +139,24 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 	return (
 		<div className={styles.main}>
 			<div className={styles.row}>
-				<button className={styles.secondary} onClick={request} onMouseEnter={() => setTooltipShown('load')} onMouseLeave={() => setTooltipShown(null)}>
+				<StyledButton type="secondary" onClick={request} size="normal" tooltip="Hotkey: L">
 					Load Questions
-				</button>
-				<button
-					className={styles.action}
+				</StyledButton>
+				<StyledButton
 					onClick={() => {
 						setActive(false);
 						setAnswering(true);
 						setAllowQuery(false);
+						setTimerActive(false);
 					}}
 					disabled={!active || answering || questionFinished}
-					onMouseEnter={() => setTooltipShown('buzz')}
-					onMouseLeave={() => setTooltipShown(null)}>
+					type="action"
+					size="normal"
+					tooltip="Hotkey: B">
 					<Bell height={12} width={12} /> Buzz!
-				</button>
-				<button
-					className={styles.primary}
+				</StyledButton>
+				<StyledButton
+					type="primary"
 					onClick={() => {
 						setActive(true);
 						setQuestionFinished(false);
@@ -163,10 +165,10 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 						setAllowQuery(false);
 					}}
 					disabled={active || answering || !questionFinished || questionIndex === questions.length - 1}
-					onMouseEnter={() => setTooltipShown('next')}
-					onMouseLeave={() => setTooltipShown(null)}>
+					size="normal"
+					tooltip="Hotkey: N">
 					Next &gt;
-				</button>
+				</StyledButton>
 			</div>
 			{answering && (
 				<AnswerBox
@@ -200,11 +202,15 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 					}
 					hasPower={powerIndex !== -1}
 					original={questions[questionIndex]}
+					ui_mode={ui_mode}
 				/>
 			)}
 			{!readingStart && questions.length > 0 && (
 				<div className={styles.loaded}>
-					Questions Loaded! <button onClick={() => setReadingStart(true)}>Start!</button>
+					Questions Loaded!{' '}
+					<StyledButton type="primary" size="big" onClick={() => setReadingStart(true)} centered>
+						Start!
+					</StyledButton>
 				</div>
 			)}
 			{questionFinished && (
@@ -228,6 +234,7 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 						hasPower
 						original={questions[i]}
 						answer={prevQuestion.userAnswer}
+						ui_mode={ui_mode}
 					/>
 				) : (
 					<CompletedQuestion
@@ -237,12 +244,10 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 						hasPower={false}
 						original={questions[i]}
 						answer={prevQuestion.userAnswer}
+						ui_mode={ui_mode}
 					/>
 				)
 			)}
-			<div className={tooltipShown === 'load' ? `${styles.tooltip} ${styles.load} ${styles.shown}` : `${styles.tooltip} ${styles.load}`}>Hotkey: L</div>
-			<div className={tooltipShown === 'buzz' ? `${styles.tooltip} ${styles.buzz} ${styles.shown}` : `${styles.tooltip} ${styles.buzz}`}>Hotkey: B</div>
-			<div className={tooltipShown === 'next' ? `${styles.tooltip} ${styles.next} ${styles.shown}` : `${styles.tooltip} ${styles.next}`}>Hotkey: N</div>
 		</div>
 	);
 };

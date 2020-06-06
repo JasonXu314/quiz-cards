@@ -1,7 +1,7 @@
 import { MongoClient, ObjectID } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+export default async (req: NextApiRequest, res: NextApiResponse<CardResponse | string>) => {
 	const dbURL =
 		process.env.NODE_ENV === 'development'
 			? 'mongodb://localhost:27017'
@@ -60,7 +60,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
 				let cards = await db
 					.collection('cards')
-					.find({
+					.find<Card>({
 						$or: [
 							...categories.map((category) =>
 								subcategories.filter((subcategory) => subcategory.startsWith(category)).length > 0
@@ -77,7 +77,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 					cards = cards.slice(start, start + limit);
 				}
 
-				res.status(200).json(cards);
+				res.status(200).json({ cards, num_cards_found: cards.length });
 			} catch (err) {
 				console.log(err);
 				res.status(500).send('DB Failed to Connect');
