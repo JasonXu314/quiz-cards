@@ -1,17 +1,18 @@
+import { categories, categoryTags, catToSubcat, catToTags } from '@/constants';
+import { compileCardRequest } from '@/util';
 import axios from 'axios';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useState } from 'react';
+import { CardResponse, ICard } from 'types';
 import styles from '../../sass/EditIndex.module.scss';
-import { categories, categoryTags, catToSubcat, catToTags } from '../../util/constants';
-import { compileCardRequest } from '../../util/util';
 
-const Index: NextPage<{}> = () => {
+const Index: NextPage = () => {
 	const [category, setCategory] = useState<string>('');
 	const [subcategory, setSubcategory] = useState<string>('');
 	const [page, setPage] = useState<number>(0);
-	const [cards, setCards] = useState<Card[]>([]);
+	const [cards, setCards] = useState<ICard[]>([]);
 
 	return (
 		<div className={styles.main}>
@@ -50,14 +51,16 @@ const Index: NextPage<{}> = () => {
 				{category != '' && (
 					<button
 						onClick={() => {
-							axios(
-								compileCardRequest('/api/cards', {
-									categories: [category],
-									subcategories: [subcategory]
-								})
-							).then((res) => {
-								setCards(res.data);
-							});
+							axios
+								.get<CardResponse>(
+									compileCardRequest('/api/cards', {
+										categories: [category],
+										subcategories: [subcategory]
+									})
+								)
+								.then((res) => {
+									setCards(res.data.cards);
+								});
 						}}>
 						Search Cards
 					</button>

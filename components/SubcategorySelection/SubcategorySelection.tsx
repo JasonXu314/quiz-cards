@@ -1,7 +1,7 @@
+import ChevronDown from '$/ChevronDown/ChevronDown';
+import ChevronUp from '$/ChevronUp/ChevronUp';
+import { categories as cats, categoryTags, catToSubcat, catToTags } from '@/constants';
 import { useEffect, useReducer } from 'react';
-import { categories as cats, categoryTags, catToSubcat, catToTags } from '../../util/constants';
-import ChevronDown from '../ChevronDown';
-import ChevronUp from '../ChevronUp';
 
 interface Props {
 	onChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
@@ -26,7 +26,7 @@ const SubcategorySelection: React.FC<Props> = ({ onChange, categories, subcatego
 		} else {
 			expandedDispatch(changed[0][0]);
 		}
-	}, [categories]);
+	}, [categories, expanded]);
 
 	return (
 		<div>

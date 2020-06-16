@@ -1,6 +1,8 @@
 node_modules/
 package-lock.json
 .next/
-deploy.bat
+redeploy.bat
 db/
 .vercel
+dist/
+.env

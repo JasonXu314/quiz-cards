@@ -1,7 +1,8 @@
 import { MongoClient, ObjectID } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { CardResponse, ICard } from 'types';
 
-export default async (req: NextApiRequest, res: NextApiResponse<CardResponse | string>) => {
+export default async (req: NextApiRequest, res: NextApiResponse<CardResponse | string>): Promise<void> => {
 	const dbURL =
 		process.env.NODE_ENV === 'development'
 			? 'mongodb://localhost:27017'
@@ -60,12 +61,14 @@ export default async (req: NextApiRequest, res: NextApiResponse<CardResponse | s
 
 				let cards = await db
 					.collection('cards')
-					.find<Card>({
+					.find<ICard>({
 						$or: [
 							...categories.map((category) =>
 								subcategories.filter((subcategory) => subcategory.startsWith(category)).length > 0
 									? {
-											$or: [...subcategories.filter((subcategory) => subcategory.startsWith(category)).map((subcategory) => ({ subcategory }))]
+											$or: [
+												...subcategories.filter((subcategory) => subcategory.startsWith(category)).map((subcategory) => ({ subcategory }))
+											]
 									  }
 									: { category }
 							)
@@ -96,6 +99,21 @@ export default async (req: NextApiRequest, res: NextApiResponse<CardResponse | s
 				console.log(err);
 				res.status(500).send('DB Failed to Connect');
 			}
+			return;
+		case 'DELETE':
+			try {
+				const { _id } = req.body;
+
+				const client = await MongoClient.connect(dbURL, { useUnifiedTopology: true });
+				const db = client.db('cards');
+
+				await db.collection('cards').findOneAndDelete({ _id: new ObjectID(_id) });
+				res.status(200).send('Card Deleted!');
+			} catch (err) {
+				console.log(err);
+				res.status(500).send('DB Failed to Connect');
+			}
+			return;
 		default:
 			res.status(405).end();
 			return;

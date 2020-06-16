@@ -1,17 +1,20 @@
+import StyledButton from '$/StyledButton/StyledButton';
+import { categories, categoryTags, catToSubcat, catToTags } from '@/constants';
 import axios from 'axios';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import Router from 'next/router';
 import { useEffect, useState } from 'react';
+import { ICard } from 'types';
 import styles from '../../sass/Edit_id.module.scss';
-import { categories, categoryTags, catToSubcat, catToTags } from '../../util/constants';
 
-const Page: NextPage<{}> = () => {
-	const [card, setCard] = useState<Card>(null);
+const Page: NextPage = () => {
+	const [card, setCard] = useState<ICard>(null);
+	const [confirming, setConfirming] = useState<boolean>(false);
 
 	useEffect(() => {
 		const { _id } = Router.query;
-		axios(`/api/cards/${_id}`).then((res) => setCard(res.data));
+		axios.get<ICard>(`/api/cards/${_id}`).then((res) => setCard(res.data));
 	}, []);
 
 	return (
@@ -51,7 +54,7 @@ const Page: NextPage<{}> = () => {
 						</select>
 					</div>
 					<div className={styles.form}>
-						<select onChange={(evt) => setCard({ ...card, subcategory: evt.target.value })} value={card.subcategory}>
+						<select onChange={(evt) => setCard({ ...card, subcategory: evt.target.value })} value={card.subcategory || ''}>
 							<option value=""></option>
 							{catToSubcat[card.category].map((subcat: string, i: number) => (
 								<option key={catToTags[card.category][i]} value={subcat}>
@@ -61,7 +64,7 @@ const Page: NextPage<{}> = () => {
 						</select>
 					</div>
 					<div className={styles.form}>
-						<button
+						<StyledButton
 							onClick={() => {
 								axios
 									.put('/api/cards', {
@@ -70,9 +73,33 @@ const Page: NextPage<{}> = () => {
 									.then(() => {
 										Router.push('/');
 									});
-							}}>
+							}}
+							type="primary"
+							size="normal">
 							Save
-						</button>
+						</StyledButton>
+					</div>
+					<div className={styles.form}>
+						<StyledButton
+							onClick={() => {
+								if (confirming) {
+									axios
+										.delete('/api/cards', {
+											data: {
+												_id: card._id
+											}
+										})
+										.then(() => {
+											Router.push('/');
+										});
+								} else {
+									setConfirming(true);
+								}
+							}}
+							type="action"
+							size="normal">
+							{confirming ? 'Confirm' : 'Delete'}
+						</StyledButton>
 					</div>
 				</div>
 			)}

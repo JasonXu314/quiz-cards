@@ -1,7 +1,11 @@
-import Document, { DocumentContext, Head, Html, Main, NextScript } from 'next/document';
+import Document, { DocumentContext, DocumentInitialProps, Head, Html, Main, NextScript } from 'next/document';
+
+interface MyDocumentInitialProps extends DocumentInitialProps {
+	path: string;
+}
 
 class MyDocument extends Document<{ path: string }> {
-	static async getInitialProps(ctx: DocumentContext) {
+	static async getInitialProps(ctx: DocumentContext): Promise<MyDocumentInitialProps> {
 		const initialProps = await Document.getInitialProps(ctx);
 
 		if (ctx.asPath === '/edit/') {
@@ -15,13 +19,6 @@ class MyDocument extends Document<{ path: string }> {
 	}
 
 	render() {
-		const { path } = this.props;
-		let displayPath = '';
-
-		if (path !== 'edit/[_id]') {
-			displayPath = path.slice(0, 1).toUpperCase() + path.slice(1);
-		}
-
 		return (
 			<Html lang="en">
 				<Head />

@@ -1,4 +1,4 @@
-import styles from '../sass/Chevron.module.scss';
+import styles from './Chevron.module.scss';
 
 interface Props {
 	onClick?: (evt: React.MouseEvent<SVGElement, MouseEvent>) => void;

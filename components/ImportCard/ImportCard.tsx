@@ -1,9 +1,10 @@
+import { categories, categoryTags, catToSubcat, catToTags } from '@/constants';
 import { memo, useState } from 'react';
-import { categories, categoryTags, catToSubcat, catToTags } from '../../util/constants';
+import { ImportCardReducerAction, IProtoCard } from 'types';
 import styles from './ImportCard.module.scss';
 
 interface Props {
-	card: ProtoCard;
+	card: IProtoCard;
 	dispatch: React.Dispatch<ImportCardReducerAction>;
 	index: number;
 }

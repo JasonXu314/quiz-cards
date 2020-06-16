@@ -1,8 +1,9 @@
 import { toWords } from 'number-to-words';
 import qs from 'qs';
 import { compareTwoStrings } from 'string-similarity';
+import { CardRequestConfig, IProtoCard, QuestionRequestConfig } from 'types';
 
-export function compileQuestionRequest(options: QuestionRequestConfig) {
+export function compileQuestionRequest(options: QuestionRequestConfig): string {
 	if (options.internal) {
 		const req = '/api/questions?';
 
@@ -36,7 +37,7 @@ export function compileQuestionRequest(options: QuestionRequestConfig) {
 	}
 }
 
-export function compileCardRequest(root: string, options: CardRequestConfig) {
+export function compileCardRequest(root: string, options: CardRequestConfig): string {
 	const req = root + '?';
 
 	let categories = 'categories=';
@@ -62,15 +63,15 @@ export function compileCardRequest(root: string, options: CardRequestConfig) {
 	return req + categories + subcategories + limit;
 }
 
-export function convertCategory(category: string) {
+export function convertCategory(category: string): number {
 	return categoryMap[category];
 }
 
-export function convertSubcategory(subcategory: string) {
+export function convertSubcategory(subcategory: string): number {
 	return subcategoryMap[subcategory];
 }
 
-export async function processCards(text: string, category: string, subcategory: string, author: string): Promise<ProtoCard[]> {
+export async function processCards(text: string, category: string, subcategory: string, author: string): Promise<IProtoCard[]> {
 	return new Promise((resolve) => {
 		const raw = text.split(/;?\n/);
 		raw.pop();
@@ -87,9 +88,9 @@ export async function processCards(text: string, category: string, subcategory: 
 	});
 }
 
-export function checkAns(userAns: string, answer: string) {
+export function checkAns(userAns: string, answer: string): boolean {
 	let ans = answer.trim().toLowerCase();
-	let user = userAns.trim().toLowerCase();
+	const user = userAns.trim().toLowerCase();
 
 	if (user === '') {
 		return false;
@@ -97,7 +98,7 @@ export function checkAns(userAns: string, answer: string) {
 
 	const matcher = /\s*(\[|\()(\w|\s|&|\.|\?|;|\/|"|,|“|”)+(\)|\])/;
 	ans = ans.slice(0, ans.match(matcher)?.index || ans.length);
-	let special = ans.slice(ans.match(matcher)?.index || ans.length).trim();
+	const special = ans.slice(ans.match(matcher)?.index || ans.length).trim();
 	console.log(ans);
 
 	const answers = ans.split(/(\s|\[|\()or\s/);
@@ -143,6 +144,40 @@ function cleanCard(card: string) {
 	}
 
 	return newCard;
+}
+
+export function sort<T>(arr: T[], comparator: (e1: T, e2: T) => 0 | -1 | 1): T[] {
+	return (function qs(lo, hi) {
+		if (lo < hi) {
+			const splitIdx = partition(arr, lo, hi, comparator);
+			return [...qs(lo, splitIdx), ...qs(splitIdx, hi)];
+		}
+	})(0, arr.length - 1);
+}
+
+function partition<T>(arr: T[], lo: number, hi: number, comparator: (e1: T, e2: T) => 0 | -1 | 1): number {
+	const pivot = arr[Math.floor((lo + hi) / 2)];
+	let i = lo;
+	let j = hi;
+
+	// eslint-disable-next-line no-constant-condition
+	while (true) {
+		while (comparator(arr[i], pivot) < 0) {
+			i++;
+		}
+		while (comparator(arr[j], pivot) > 0) {
+			j++;
+		}
+		if (i >= j) {
+			return j;
+		}
+		const temp = arr[j];
+		arr[j] = arr[i];
+		arr[i] = temp;
+
+		i++;
+		j--;
+	}
 }
 
 const categoryMap = {

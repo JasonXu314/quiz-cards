@@ -1,3 +1,5 @@
+import { ObjectId } from 'mongodb';
+
 interface TossupQuestion {
 	id: number;
 	text: string;
@@ -106,13 +108,17 @@ interface QuizDBResponse {
 }
 
 interface CardResponse {
-	cards: Card[];
+	cards: ICard[];
 	num_cards_found: number;
 }
 
 interface QuestionResponse {
 	questions: TossupQuestion[];
 	num_questions_found: number;
+}
+
+interface LeaderboardResponse {
+	leaderboard: User[];
 }
 
 interface UsedQuestion {
@@ -123,7 +129,7 @@ interface UsedQuestion {
 	userAnswer: string;
 }
 
-interface Card {
+interface ICard {
 	hint: string;
 	answer: string;
 	subcategory: string | null;
@@ -132,12 +138,28 @@ interface Card {
 	author: string | null;
 }
 
-interface ProtoCard {
+interface IProtoCard {
 	hint: string;
 	answer: string;
 	category: string;
 	subcategory: string | null;
 	author: string | null;
+}
+
+interface User {
+	name: string;
+	score: number;
+	_id: number;
+}
+
+interface DBUser {
+	name: string;
+	score: number;
+	_id: ObjectId;
+}
+interface UserWithoutScore {
+	name: string;
+	_id: number;
 }
 
 interface QuestionRequestConfig {
@@ -158,7 +180,7 @@ type AppMode = 'read' | 'card';
 type UIMode = 'protobowl' | 'tabled';
 
 type ImportCardReducerAction =
-	| { type: 'SET'; cards: ProtoCard[] }
+	| { type: 'SET'; cards: IProtoCard[] }
 	| { type: 'CATEGORY'; i: number; category: string }
 	| { type: 'SUBCATEGORY'; i: number; subcategory: string };
 
@@ -176,6 +198,7 @@ interface Settings {
 	useLimit: boolean;
 	limit: number;
 	speed: number;
+	user: UserWithoutScore | null;
 }
 
 type SettingsAction =
@@ -187,4 +210,32 @@ type SettingsAction =
 	| { type: 'SET_LIMIT'; limit: number }
 	| { type: 'SET_SPEED'; speed: number }
 	| { type: 'SET_USE_LIMIT'; useLimit: boolean }
-	| { type: 'SET_UI_MODE'; mode: UIMode };
+	| { type: 'SET_UI_MODE'; mode: UIMode }
+	| { type: 'SET_USER'; user: Partial<UserWithoutScore> };
+
+type ScoreAction = { type: 'NEG' } | { type: 'POWER' } | { type: 'TEN' } | { type: 'SET'; score: number };
+
+interface EventWithTypes {
+	type: string;
+}
+
+type GatewayServerEvent = NewUserEvent | { type: 'POINT_CHANGE'; _id: number; score: number } | { type: 'NAME_CHANGE'; _id: number; name: string };
+type GatewayClientEvent =
+	| { type: 'POINT_CHANGE'; _id: number; score: number }
+	| { type: 'CREATE_USER'; name: string }
+	| { type: 'NAME_CHANGE'; _id: number; name: string };
+
+interface NewUserEvent {
+	type: 'NEW_USER';
+	_id: number;
+	name: string;
+}
+
+interface ConnectionResponse {
+	msg: string;
+}
+
+interface ScoreEvent {
+	name: string;
+	score: number;
+}

@@ -1,15 +1,16 @@
+import ImportCard from '$/ImportCard/ImportCard';
+import StyledInput from '$/StyledInput/StyledInput';
+import { categories, categoryTags, catToSubcat, catToTags } from '@/constants';
+import { processCards } from '@/util';
 import axios from 'axios';
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useReducer, useState } from 'react';
-import ImportCard from '../components/ImportCard/ImportCard';
-import StyledInput from '../components/StyledInput/StyledInput';
+import { ImportCardReducerAction, IProtoCard } from 'types';
 import styles from '../sass/Import.module.scss';
-import { categories, categoryTags, catToSubcat, catToTags } from '../util/constants';
-import { processCards } from '../util/util';
 
-const reducer: React.Reducer<ProtoCard[], ImportCardReducerAction> = (cards, action) => {
+const reducer: React.Reducer<IProtoCard[], ImportCardReducerAction> = (cards, action) => {
 	const newCards = [...cards];
 
 	switch (action.type) {
@@ -92,7 +93,7 @@ const Import: NextPage<{ url: string }> = ({ url }) => {
 					<h3>Instructions:</h3>
 					<p>In Anki, navigate to the overview screen containing all your decks</p>
 					<p>Click the gear next to the desired deck and hit export</p>
-					<p>Set the Export Format to "Cards in Plain Text (*.txt)</p>
+					<p>Set the Export Format to &quot;Cards in Plain Text (*.txt)&quot;</p>
 				</div>
 				<hr />
 				<div>

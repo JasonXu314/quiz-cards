@@ -1,4 +1,4 @@
-import styles from '../sass/Bell.module.scss';
+import styles from './Bell.module.scss';
 
 interface Props {
 	height?: number;

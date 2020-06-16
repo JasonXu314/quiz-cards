@@ -1,12 +1,12 @@
+import StyledInput from '$/StyledInput/StyledInput';
+import { categories, categoryTags, catToSubcat, catToTags } from '@/constants';
 import axios from 'axios';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import { useState } from 'react';
-import StyledInput from '../components/StyledInput/StyledInput';
 import styles from '../sass/Create.module.scss';
-import { categories, categoryTags, catToSubcat, catToTags } from '../util/constants';
 
-const Create: NextPage<{}> = () => {
+const Create: NextPage = () => {
 	const [category, setCategory] = useState<string>('Literature');
 	const [subcategory, setSubcategory] = useState<string>('');
 	const [hint, setHint] = useState<string>('');

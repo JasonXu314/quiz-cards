@@ -1,5 +1,5 @@
+import Pencil from '$/Pencil';
 import { useEffect, useRef } from 'react';
-import Pencil from '../../Pencil';
 import styles from './AnswerBox.module.scss';
 
 interface Props {

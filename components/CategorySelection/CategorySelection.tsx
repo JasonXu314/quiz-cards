@@ -1,7 +1,7 @@
+import ChevronDown from '$/ChevronDown/ChevronDown';
+import ChevronUp from '$/ChevronUp/ChevronUp';
+import { categories as cats, categoryTags as tags } from '@/constants';
 import { useState } from 'react';
-import { categories as cats, categoryTags as tags } from '../../util/constants';
-import ChevronDown from '../ChevronDown';
-import ChevronUp from '../ChevronUp';
 import styles from './CategorySelection.module.scss';
 
 interface Props {

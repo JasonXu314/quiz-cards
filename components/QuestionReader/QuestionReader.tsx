@@ -1,8 +1,9 @@
+import { activeState, answeringState, questionIndexState, readingStartState, usedQuestionsState } from '@/atoms';
+import { checkAns } from '@/util';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { activeState, answeringState, questionIndexState, readingStartState, usedQuestionsState } from '../../util/atoms';
-import { checkAns } from '../../util/util';
-import Bell from '../Bell';
+import { QuestionReaderMethods, ScoreAction, TossupQuestion, UIMode } from 'types';
+import Bell from '../Bell/Bell';
 import StyledButton from '../StyledButton/StyledButton';
 import AnswerBox from './AnswerBox/AnswerBox';
 import CompletedQuestion from './CompletedQuestion/CompletedQuestion';
@@ -20,10 +21,11 @@ interface Props {
 	setTimerActive: React.Dispatch<React.SetStateAction<boolean>>;
 	request: () => void;
 	ui_mode: UIMode;
+	scoreDispatch: React.Dispatch<ScoreAction>;
 }
 
 const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Props> = (
-	{ questions, speed, setAllowQuery, setMsg, request, setTime, correct, setCorrect, setTimerActive, ui_mode },
+	{ questions, speed, setAllowQuery, setMsg, request, setTime, correct, setCorrect, setTimerActive, ui_mode, scoreDispatch },
 	ref
 ) => {
 	const [questionTokens, setQuestionTokens] = useState<string[]>([]);
@@ -37,30 +39,47 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 	const [questionIndex, setQuestionIndex] = useRecoilState(questionIndexState);
 	const [readingStart, setReadingStart] = useRecoilState(readingStartState);
 
-	useImperativeHandle(ref, () => ({
-		endQuestion: () => {
-			setActive(false);
-			setQuestionFinished(true);
-			setCorrect(checkAns(userAnswer, questions[questionIndex].answer));
-		},
-		performReset: () => {
-			setActive(false);
-			setQuestionFinished(false);
-			setCorrect(false);
-			setIdx(0);
-			setQuestionTokens([]);
-			setAnswering(false);
-			setQuestionIndex(0);
-			setUserAnswer('');
-			setUsedQuestions([]);
-		}
-	}));
+	useImperativeHandle(
+		ref,
+		() => ({
+			endQuestion: () => {
+				setActive(false);
+				setQuestionFinished(true);
+				setAllowQuery(true);
+
+				const correct = checkAns(userAnswer, questions[questionIndex].answer);
+				setCorrect(correct);
+				if (correct) {
+					if (powerIndex > idx) {
+						scoreDispatch({ type: 'POWER' });
+					} else {
+						scoreDispatch({ type: 'TEN' });
+					}
+				} else if (!questionFinished) {
+					scoreDispatch({ type: 'NEG' });
+				}
+			},
+			performReset: () => {
+				setActive(false);
+				setQuestionFinished(false);
+				setCorrect(false);
+				setIdx(0);
+				setQuestionTokens([]);
+				setAnswering(false);
+				setQuestionIndex(0);
+				setUserAnswer('');
+				setUsedQuestions([]);
+			}
+		}),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[idx, powerIndex, questionFinished, questionIndex, questions, userAnswer, setActive, setAnswering, setQuestionIndex, setUserAnswer, setUsedQuestions]
+	);
 
 	const keypressHandler = useCallback(
 		(evt: KeyboardEvent) => {
 			switch (evt.code) {
 				case 'Space':
-					if (active && !answering) {
+					if (active && !answering && evt.target === document.body) {
 						setAllowQuery(false);
 						setAnswering(true);
 						setTimerActive(false);
@@ -68,7 +87,7 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 					}
 					break;
 				case 'KeyN':
-					if (!active && !answering && questionFinished) {
+					if (!active && !answering && questionFinished && evt.target === document.body) {
 						if (questionIndex !== questions.length - 1) {
 							setActive(true);
 							setQuestionFinished(false);
@@ -90,7 +109,22 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 					break;
 			}
 		},
-		[active, answering, questionFinished, questionIndex, questions]
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[
+			active,
+			answering,
+			questionFinished,
+			questionIndex,
+			questions,
+			idx,
+			powerIndex,
+			usedQuestions,
+			userAnswer,
+			setActive,
+			setUsedQuestions,
+			setAnswering,
+			setQuestionIndex
+		]
 	);
 
 	useEffect(() => {
@@ -103,7 +137,8 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 				setTime(questions[questionIndex].text.split(' ').length * speed + 5000);
 			}
 		}
-	}, [questionIndex, questions, readingStart]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [questionIndex, questions, readingStart, speed, setActive]);
 
 	useEffect(() => {
 		const intervalID = setInterval(() => {
@@ -179,8 +214,19 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 						setAnswering(false);
 						setActive(false);
 						setQuestionFinished(true);
-						setCorrect(checkAns(userAnswer, questions[questionIndex].answer));
 						setAllowQuery(true);
+
+						const correct = checkAns(userAnswer, questions[questionIndex].answer);
+						setCorrect(correct);
+						if (correct) {
+							if (powerIndex > idx) {
+								scoreDispatch({ type: 'POWER' });
+							} else {
+								scoreDispatch({ type: 'TEN' });
+							}
+						} else if (!questionFinished) {
+							scoreDispatch({ type: 'NEG' });
+						}
 					}}
 				/>
 			)}
@@ -224,30 +270,32 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 					<strong>Answer:</strong> {questions[questionIndex].answer}
 				</div>
 			)}
-			{usedQuestions.map((prevQuestion, i) =>
-				prevQuestion.hasPower ? (
-					<CompletedQuestion
-						key={i}
-						powerText={prevQuestion.question.text.split(' ').slice(0, prevQuestion.powerIndex)}
-						normalText={prevQuestion.question.text.split(' ').slice(prevQuestion.powerIndex + 1)}
-						buzzLocation={prevQuestion.buzzLocation}
-						hasPower
-						original={questions[i]}
-						answer={prevQuestion.userAnswer}
-						ui_mode={ui_mode}
-					/>
-				) : (
-					<CompletedQuestion
-						key={i}
-						normalText={prevQuestion.question.text.split(' ')}
-						buzzLocation={prevQuestion.buzzLocation}
-						hasPower={false}
-						original={questions[i]}
-						answer={prevQuestion.userAnswer}
-						ui_mode={ui_mode}
-					/>
-				)
-			)}
+			{[...usedQuestions]
+				.reverse()
+				.map((prevQuestion, i) =>
+					prevQuestion.hasPower ? (
+						<CompletedQuestion
+							key={i}
+							powerText={prevQuestion.question.text.split(' ').slice(0, prevQuestion.powerIndex)}
+							normalText={prevQuestion.question.text.split(' ').slice(prevQuestion.powerIndex + 1)}
+							buzzLocation={prevQuestion.buzzLocation}
+							hasPower
+							original={questions[i]}
+							answer={prevQuestion.userAnswer}
+							ui_mode={ui_mode}
+						/>
+					) : (
+						<CompletedQuestion
+							key={i}
+							normalText={prevQuestion.question.text.split(' ')}
+							buzzLocation={prevQuestion.buzzLocation}
+							hasPower={false}
+							original={questions[i]}
+							answer={prevQuestion.userAnswer}
+							ui_mode={ui_mode}
+						/>
+					)
+				)}
 		</div>
 	);
 };

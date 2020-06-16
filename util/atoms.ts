@@ -1,4 +1,5 @@
 import { atom } from 'recoil';
+import { UsedQuestion } from 'types';
 
 export const answeringState = atom({
 	key: 'answering',

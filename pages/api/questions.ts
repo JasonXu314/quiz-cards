@@ -1,8 +1,9 @@
+import { compileQuestionRequest } from '@/util';
 import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { compileQuestionRequest } from '../../util/util';
+import { QuestionResponse, QuizDBResponse } from 'types';
 
-export default async (req: NextApiRequest, res: NextApiResponse<QuestionResponse | string>) => {
+export default async (req: NextApiRequest, res: NextApiResponse<QuestionResponse | string>): Promise<void> => {
 	const preFormatReq = {
 		categories: null,
 		limit: null,

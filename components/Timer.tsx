@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import styles from '../sass/Timer.module.scss';
 
 interface Props {
-	timeout: () => void;
-	tick: (remaining: number) => void;
+	timeout?: () => void;
+	tick?: (remaining: number) => void;
 	active: boolean;
 	time: number;
 	dummy?: boolean;
@@ -21,11 +21,15 @@ const Timer: React.FC<Props> = ({ time, active, timeout, tick, dummy = false, an
 				if (active) {
 					t += 50;
 					setProgress(t / time);
-					tick(time - t < 0 ? 0 : time - t);
+					if (tick) {
+						tick(time - t < 0 ? 0 : time - t);
+					}
 					if (t >= time) {
 						clearInterval(intervalID);
 						setProgress(1);
-						timeout();
+						if (timeout) {
+							timeout();
+						}
 					}
 				}
 			}, 50);
@@ -34,7 +38,7 @@ const Timer: React.FC<Props> = ({ time, active, timeout, tick, dummy = false, an
 				clearInterval(intervalID);
 			};
 		}
-	}, [time, active]);
+	}, [time, active, tick, dummy, timeout]);
 
 	if (dummy) {
 		return (

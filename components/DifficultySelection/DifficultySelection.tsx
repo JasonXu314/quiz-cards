@@ -1,4 +1,4 @@
-import { difNumToString, difNumToTags } from '../../util/constants';
+import { difNumToString, difNumToTags } from '@/constants';
 import styles from './DifficultySelection.module.scss';
 
 interface Props {

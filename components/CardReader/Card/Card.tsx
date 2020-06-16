@@ -1,8 +1,9 @@
 import Link from 'next/link';
+import { ICard } from 'types';
 import styles from './Card.module.scss';
 
 interface Props {
-	card: Card;
+	card: ICard;
 	setFlipped: React.Dispatch<React.SetStateAction<boolean>>;
 	flipped: boolean;
 }

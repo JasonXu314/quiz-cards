@@ -1,3 +1,4 @@
+import { UIMode } from 'types';
 import styles from './UIModeSelector.module.scss';
 
 interface Props {

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
+import { ICard } from 'types';
 import StyledButton from '../StyledButton/StyledButton';
 import Card from './Card/Card';
 import styles from './CardReader.module.scss';
 
 interface Props {
-	cards: Card[];
+	cards: ICard[];
 	request: () => void;
 }
 

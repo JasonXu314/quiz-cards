@@ -1,3 +1,5 @@
+import { AppMode } from 'types';
+
 interface Props {
 	mode: AppMode;
 	onChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
