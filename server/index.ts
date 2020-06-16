@@ -15,12 +15,14 @@ app.prepare().then(() => {
 	createServer((req, res) => {
 		const parsedUrl = parse(req.url!, true);
 
-		if (parsedUrl.pathname.endsWith('/socket')) {
-			res.write(serverAddress);
-			res.end();
-		} else {
-			handle(req, res, parsedUrl);
-		}
+		// if (parsedUrl.pathname.endsWith('/socket')) {
+		// 	res.write(serverAddress);
+		// 	res.end();
+		// } else {
+		// 	handle(req, res, parsedUrl);
+		// }
+		res.write(serverAddress);
+		res.end();
 	}).listen(port);
 });
 
