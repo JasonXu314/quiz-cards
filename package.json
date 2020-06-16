@@ -2,13 +2,11 @@
 	"name": "quiz-cards",
 	"version": "1.0.0",
 	"description": "",
-	"main": "index.js",
 	"dependencies": {
 		"@types/recoil": "0.0.0",
 		"@types/string-similarity": "^3.0.0",
 		"axios": "^0.19.2",
 		"cookie": "^0.4.1",
-		"cross-env": "^7.0.2",
 		"js-cookie": "^2.2.1",
 		"mongodb": "^3.5.9",
 		"next": "^9.4.2",
@@ -43,7 +41,7 @@
 	"scripts": {
 		"dev": "nodemon",
 		"build": "next build && tsc --project tsconfig.server.json",
-		"start": "cross-env NODE_ENV=production node dist/index.js",
+		"start": "node dist/index.js",
 		"test": "jest"
 	},
 	"keywords": [],

@@ -368,6 +368,7 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings, score: 
 									);
 								} else if (evt.target.value !== '') {
 									socket.json<GatewayClientEvent>({ type: 'NAME_CHANGE', name: evt.target.value, _id: settings.user._id });
+									dispatch({ type: 'SET_USER', user: { name: evt.target.value } });
 								} else {
 									dispatch({ type: 'SET_USER', user: null });
 									scoreDispatch({ type: 'SET', score: 0 });
