@@ -157,10 +157,7 @@ interface DBUser {
 	score: number;
 	_id: ObjectId;
 }
-interface UserWithoutScore {
-	name: string;
-	_id: number;
-}
+type UserWithoutScore = Omit<User, 'score'>;
 
 interface QuestionRequestConfig {
 	categories: string[];
@@ -213,29 +210,15 @@ type SettingsAction =
 	| { type: 'SET_UI_MODE'; mode: UIMode }
 	| { type: 'SET_USER'; user: Partial<UserWithoutScore> };
 
-type ScoreAction = { type: 'NEG' } | { type: 'POWER' } | { type: 'TEN' } | { type: 'SET'; score: number };
-
-interface EventWithTypes {
-	type: string;
+interface CreateUserPost {
+	name: string;
 }
 
-type GatewayServerEvent = NewUserEvent | { type: 'POINT_CHANGE'; _id: number; score: number } | { type: 'NAME_CHANGE'; _id: number; name: string };
-type GatewayClientEvent =
-	| { type: 'POINT_CHANGE'; _id: number; score: number }
-	| { type: 'CREATE_USER'; name: string }
-	| { type: 'NAME_CHANGE'; _id: number; name: string };
+interface CreateUserResponse {
+	user: UserWithoutScore;
+}
 
-interface NewUserEvent {
-	type: 'NEW_USER';
+interface ScorePost {
 	_id: number;
-	name: string;
-}
-
-interface ConnectionResponse {
-	msg: string;
-}
-
-interface ScoreEvent {
-	name: string;
-	score: number;
+	type: 'TEN' | 'NEG' | 'POWER';
 }

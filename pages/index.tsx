@@ -9,36 +9,29 @@ import SubcategorySelection from '$/SubcategorySelection/SubcategorySelection';
 import Timer from '$/Timer';
 import UIModeSelector from '$/UIModeSelector/UIModeSelector';
 import { answeringState } from '@/atoms';
-import MySocket from '@/MySocket';
 import { compileCardRequest, compileQuestionRequest } from '@/util';
 import axios from 'axios';
 import cookie from 'cookie';
 import { IncomingMessage } from 'http';
 import Cookies from 'js-cookie';
-import { MongoClient, ObjectId } from 'mongodb';
 import Head from 'next/head';
 import Link from 'next/link';
 import { GetServerSideProps, NextPage } from 'next/types';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
+import useSWR from 'swr';
 import {
 	AppMode,
 	CardResponse,
-	DBUser,
-	GatewayClientEvent,
-	GatewayServerEvent,
+	CreateUserResponse,
 	ICard,
 	LeaderboardResponse,
-	NewUserEvent,
 	QuestionReaderMethods,
 	QuestionResponse,
-	ScoreAction,
 	Settings,
 	SettingsAction,
 	TossupQuestion,
-	UIMode,
-	User,
-	UserWithoutScore
+	UIMode
 } from 'types';
 import styles from '../sass/Index.module.scss';
 
@@ -88,27 +81,11 @@ const settingsReducer: React.Reducer<Settings, SettingsAction> = (settings, acti
 	}
 };
 
-const scoreReducer: React.Reducer<number, ScoreAction> = (score, action) => {
-	switch (action.type) {
-		case 'TEN':
-			return score + 10;
-		case 'NEG':
-			return score - 5;
-		case 'POWER':
-			return score + 15;
-		case 'SET':
-			return action.score;
-		default:
-			return score;
-	}
-};
-
 interface IndexInitialProps {
 	settings: Settings;
-	score: number;
 }
 
-const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings, score: userScore }) => {
+const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 	const [cards, setCards] = useState<ICard[]>([]);
 	const [questions, setQuestions] = useState<TossupQuestion[]>([]);
 	const [timeDisplay, setTimeDisplay] = useState<number>(0);
@@ -119,11 +96,15 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings, score: 
 	const [time, setTime] = useState<number>(0);
 	const [correct, setCorrect] = useState<boolean>(false);
 	const [answering, setAnswering] = useRecoilState(answeringState);
-	const [leaderboard, setLeaderboard] = useState<User[]>([]);
-	const [score, scoreDispatch] = useReducer<typeof scoreReducer>(scoreReducer, userScore);
-	const [socket, setSocket] = useState<MySocket>(null);
 	const [eagerName, setEagerName] = useState<string>(initialSettings?.user?.name || '');
 	const readerRef = useRef<QuestionReaderMethods>(null);
+	const { data: leaderboardData, error: leaderboardError } = useSWR(
+		'/api/gateway/leaderboard',
+		useCallback(async (url) => (await axios.get<LeaderboardResponse>(url)).data, []),
+		{
+			refreshInterval: 1
+		}
+	);
 	const [settings, dispatch] = useReducer<typeof settingsReducer, Settings>(
 		settingsReducer,
 		initialSettings,
@@ -232,48 +213,6 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings, score: 
 		};
 	}, [keypressHandler]);
 
-	useEffect(() => {
-		axios.get<LeaderboardResponse>('/api/leaderboard').then((res) => {
-			setLeaderboard(res.data.leaderboard);
-		});
-		const sock = new MySocket(`${location.protocol.replace('http', 'ws')}//${location.hostname}:5000`);
-
-		sock.onMsgOnce((msg) => {
-			console.log(msg);
-		});
-
-		setSocket(sock);
-	}, []);
-
-	useEffect(() => {
-		if (socket?.ready) {
-			return socket.onMsg<GatewayServerEvent>((msg) => {
-				switch (msg.type) {
-					case 'POINT_CHANGE':
-						setLeaderboard(leaderboard.map((user) => (user._id === msg._id ? { ...user, score: msg.score } : user)));
-						if (settings.user && msg._id === settings.user._id) {
-							scoreDispatch({ type: 'SET', score: msg.score });
-						}
-						break;
-					case 'NEW_USER':
-						setLeaderboard([...leaderboard, { name: msg.name, score: 0, _id: msg._id }]);
-						break;
-					case 'NAME_CHANGE':
-						setLeaderboard(leaderboard.map((user) => (user._id === msg._id ? { ...user, name: msg.name } : user)));
-						break;
-					default:
-						return;
-				}
-			});
-		}
-	}, [leaderboard, socket, settings.user]);
-
-	useEffect(() => {
-		if (socket && socket.ready && settings.user) {
-			socket.json<GatewayClientEvent>({ type: 'POINT_CHANGE', _id: settings.user._id, score });
-		}
-	}, [score, settings.user, socket]);
-
 	return (
 		<div className={styles.main}>
 			<Head>
@@ -354,24 +293,25 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings, score: 
 							value={eagerName}
 							onChange={(evt) => setEagerName(evt.target.value)}
 							onBlur={(evt) => {
-								if (leaderboard.map((user) => user.name).includes(evt.target.value)) {
-									scoreDispatch({ type: 'SET', score: leaderboard.find((user) => user.name === evt.target.value).score });
-									dispatch({ type: 'SET_USER', user: leaderboard.find((user) => user.name === evt.target.value) });
+								if (leaderboardData.leaderboard.map((user) => user.name).includes(evt.target.value)) {
+									const { _id, name } = leaderboardData.leaderboard.find((user) => user.name === evt.target.value);
+
+									dispatch({ type: 'SET_USER', user: { _id, name } });
 								} else if (!settings.user && evt.target.value !== '') {
-									socket.json<GatewayClientEvent>({ type: 'CREATE_USER', name: evt.target.value });
-									socket.expect<NewUserEvent>(
-										'NEW_USER',
-										(msg) => {
-											dispatch({ type: 'SET_USER', user: { _id: msg._id, name: msg.name } });
-										},
-										{ once: true }
-									);
+									axios
+										.post<CreateUserResponse>('/api/gateway/user', {
+											name: evt.target.value
+										})
+										.then((res) => {
+											dispatch({ type: 'SET_USER', user: res.data.user });
+										});
 								} else if (evt.target.value !== '') {
-									socket.json<GatewayClientEvent>({ type: 'NAME_CHANGE', name: evt.target.value, _id: settings.user._id });
-									dispatch({ type: 'SET_USER', user: { name: evt.target.value } });
+									axios.patch('/api/gateway/user', {
+										_id: settings.user._id,
+										name: evt.target.value
+									});
 								} else {
 									dispatch({ type: 'SET_USER', user: null });
-									scoreDispatch({ type: 'SET', score: 0 });
 								}
 							}}
 						/>
@@ -397,16 +337,16 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings, score: 
 					<h4>Note:</h4> this site uses cookies to persist settings between sessions. Disable button coming soon!
 				</div>
 				<div className={styles.leaderboard}>
-					{leaderboard.map((user) =>
-						user._id === settings.user?._id ? (
-							<div key={user._id} className={styles.entry}>
-								<h4>{user.name}</h4> {score}
-							</div>
-						) : (
+					{leaderboardError ? (
+						<div className={styles.entry}>Error loading leaderboard...</div>
+					) : leaderboardData ? (
+						leaderboardData.leaderboard.map((user) => (
 							<div key={user._id} className={styles.entry}>
 								<h4>{user.name}</h4> {user.score}
 							</div>
-						)
+						))
+					) : (
+						<div className={styles.entry}>Loading...</div>
 					)}
 				</div>
 			</div>
@@ -422,11 +362,11 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings, score: 
 							setTime,
 							correct,
 							setCorrect,
-							setTimerActive,
-							scoreDispatch,
-							ui_mode: settings.ui_mode,
-							speed: settings.speed
+							setTimerActive
 						}}
+						ui_mode={settings.ui_mode}
+						userId={settings.user?._id}
+						speed={settings.speed}
 						ref={readerRef}
 					/>
 				) : (
@@ -444,26 +384,11 @@ function parseCookies(req: IncomingMessage) {
 }
 
 export const getServerSideProps: GetServerSideProps<IndexInitialProps> = async ({ req }) => {
-	const dbURL =
-		process.env.NODE_ENV === 'development'
-			? 'mongodb://localhost:27017'
-			: `mongodb+srv://Me:${process.env.MONGODB_PASSWORD}@quiz-cards-cluster-hwc6f.mongodb.net/test?retryWrites=true&w=majority`;
-	const mongoClient = await MongoClient.connect(dbURL, { useUnifiedTopology: true });
 	const cookies = parseCookies(req);
-	const thisUser: UserWithoutScore | null = cookies.settings ? JSON.parse(cookies.settings).user : null;
-	const score = thisUser
-		? (
-				await mongoClient
-					.db('cards')
-					.collection<DBUser>('leaderboard')
-					.findOne({ _id: new ObjectId(thisUser._id) })
-		  ).score
-		: 0;
 
 	return {
 		props: {
-			settings: cookies.settings ? JSON.parse(cookies.settings) : null,
-			score
+			settings: cookies.settings ? JSON.parse(cookies.settings) : null
 		}
 	};
 };

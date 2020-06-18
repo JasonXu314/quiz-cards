@@ -1,8 +1,9 @@
 import { activeState, answeringState, questionIndexState, readingStartState, usedQuestionsState } from '@/atoms';
 import { checkAns } from '@/util';
+import axios from 'axios';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { QuestionReaderMethods, ScoreAction, TossupQuestion, UIMode } from 'types';
+import { QuestionReaderMethods, TossupQuestion, UIMode } from 'types';
 import Bell from '../Bell/Bell';
 import StyledButton from '../StyledButton/StyledButton';
 import AnswerBox from './AnswerBox/AnswerBox';
@@ -21,11 +22,11 @@ interface Props {
 	setTimerActive: React.Dispatch<React.SetStateAction<boolean>>;
 	request: () => void;
 	ui_mode: UIMode;
-	scoreDispatch: React.Dispatch<ScoreAction>;
+	userId: number;
 }
 
 const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Props> = (
-	{ questions, speed, setAllowQuery, setMsg, request, setTime, correct, setCorrect, setTimerActive, ui_mode, scoreDispatch },
+	{ questions, speed, setAllowQuery, setMsg, request, setTime, correct, setCorrect, setTimerActive, ui_mode, userId },
 	ref
 ) => {
 	const [questionTokens, setQuestionTokens] = useState<string[]>([]);
@@ -49,14 +50,23 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 
 				const correct = checkAns(userAnswer, questions[questionIndex].answer);
 				setCorrect(correct);
-				if (correct) {
+				if (correct && userId) {
 					if (powerIndex > idx) {
-						scoreDispatch({ type: 'POWER' });
+						axios.post('/api/gateway', {
+							_id: userId,
+							type: 'POWER'
+						});
 					} else {
-						scoreDispatch({ type: 'TEN' });
+						axios.post('/api/gateway', {
+							_id: userId,
+							type: 'TEN'
+						});
 					}
 				} else if (!questionFinished) {
-					scoreDispatch({ type: 'NEG' });
+					axios.post('/api/gateway', {
+						_id: userId,
+						type: 'NEG'
+					});
 				}
 			},
 			performReset: () => {
@@ -218,14 +228,23 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 
 						const correct = checkAns(userAnswer, questions[questionIndex].answer);
 						setCorrect(correct);
-						if (correct) {
+						if (correct && userId) {
 							if (powerIndex > idx) {
-								scoreDispatch({ type: 'POWER' });
+								axios.post('/api/gateway', {
+									_id: userId,
+									type: 'POWER'
+								});
 							} else {
-								scoreDispatch({ type: 'TEN' });
+								axios.post('/api/gateway', {
+									_id: userId,
+									type: 'TEN'
+								});
 							}
 						} else if (!questionFinished) {
-							scoreDispatch({ type: 'NEG' });
+							axios.post('/api/gateway', {
+								_id: userId,
+								type: 'NEG'
+							});
 						}
 					}}
 				/>

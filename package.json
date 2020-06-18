@@ -17,6 +17,7 @@
 		"recoil": "0.0.7",
 		"sass": "^1.26.8",
 		"string-similarity": "^4.0.1",
+		"swr": "^0.2.3",
 		"ws": "^7.3.0"
 	},
 	"devDependencies": {
@@ -33,15 +34,13 @@
 		"eslint": "^7.2.0",
 		"eslint-plugin-react": "^7.20.0",
 		"eslint-plugin-react-hooks": "^4.0.4",
-		"nodemon": "^2.0.4",
 		"react-test-render": "^1.1.2",
-		"ts-node": "^8.10.2",
-		"typescript": "3.8.3"
+		"typescript": "^3.9.5"
 	},
 	"scripts": {
-		"dev": "nodemon",
-		"build": "next build && tsc --project tsconfig.server.json",
-		"start": "node dist/index.js",
+		"dev": "next",
+		"build": "next build",
+		"start": "next start",
 		"test": "jest"
 	},
 	"keywords": [],
