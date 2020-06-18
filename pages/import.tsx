@@ -7,7 +7,7 @@ import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useReducer, useState } from 'react';
-import { ImportCardReducerAction, IProtoCard } from 'types';
+import { Category, ImportCardReducerAction, IProtoCard } from 'types';
 import styles from '../sass/Import.module.scss';
 
 const reducer: React.Reducer<IProtoCard[], ImportCardReducerAction> = (cards, action) => {
@@ -27,7 +27,7 @@ const reducer: React.Reducer<IProtoCard[], ImportCardReducerAction> = (cards, ac
 
 const Import: NextPage<{ url: string }> = ({ url }) => {
 	const [cards, dispatch] = useReducer(reducer, []);
-	const [category, setCategory] = useState<string>('Literature');
+	const [category, setCategory] = useState<Category>('Literature');
 	const [subcategory, setSubcategory] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState(null);
@@ -48,7 +48,7 @@ const Import: NextPage<{ url: string }> = ({ url }) => {
 						<h4>Category:</h4>
 						<select
 							onChange={(evt) => {
-								setCategory(evt.target.value);
+								setCategory(evt.target.value as Category);
 								setSubcategory('');
 							}}
 							value={category}>
@@ -58,7 +58,7 @@ const Import: NextPage<{ url: string }> = ({ url }) => {
 								</option>
 							))}
 						</select>
-						{category !== '' && <h4>Subcategory:</h4>}
+						<h4>Subcategory:</h4>
 						<select onChange={(evt) => setSubcategory(evt.target.value)} value={subcategory}>
 							<option value=""></option>
 							{catToSubcat[category].map((subcat: string, i: number) => (
@@ -116,7 +116,7 @@ const Import: NextPage<{ url: string }> = ({ url }) => {
 							type="file"
 							onChange={(evt) => {
 								setLoading(true);
-								Array.from(evt.target.files).forEach((file) => {
+								Array.from(evt.target.files!).forEach((file) => {
 									file.text()
 										.then((text) => processCards(text, category, subcategory, author))
 										.then((cards) => {

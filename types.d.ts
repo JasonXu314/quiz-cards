@@ -1,3 +1,4 @@
+import { categories } from '@/constants';
 import { ObjectId } from 'mongodb';
 
 interface TossupQuestion {
@@ -152,15 +153,24 @@ interface User {
 	_id: number;
 }
 
+interface UserWithoutScore {
+	name: string;
+	_id: number;
+}
+
+interface PartialUser {
+	name?: string;
+	_id?: number;
+}
+
 interface DBUser {
 	name: string;
 	score: number;
 	_id: ObjectId;
 }
-type UserWithoutScore = Omit<User, 'score'>;
 
 interface QuestionRequestConfig {
-	categories: string[];
+	categories: (keyof typeof categories)[];
 	limit: number;
 	internal: boolean;
 	subcategories: string[];
@@ -175,6 +185,18 @@ interface CardRequestConfig {
 
 type AppMode = 'read' | 'card';
 type UIMode = 'protobowl' | 'tabled';
+type Category =
+	| 'Literature'
+	| 'Science'
+	| 'History'
+	| 'Fine Arts'
+	| 'Mythology'
+	| 'Religion'
+	| 'Geography'
+	| 'Philosophy'
+	| 'Current Events'
+	| 'Social Science'
+	| 'Trash';
 
 type ImportCardReducerAction =
 	| { type: 'SET'; cards: IProtoCard[] }
@@ -208,7 +230,7 @@ type SettingsAction =
 	| { type: 'SET_SPEED'; speed: number }
 	| { type: 'SET_USE_LIMIT'; useLimit: boolean }
 	| { type: 'SET_UI_MODE'; mode: UIMode }
-	| { type: 'SET_USER'; user: Partial<UserWithoutScore> };
+	| { type: 'SET_USER'; user: PartialUser | null };
 
 interface CreateUserPost {
 	name: string;

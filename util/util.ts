@@ -2,6 +2,7 @@ import { toWords } from 'number-to-words';
 import qs from 'qs';
 import { compareTwoStrings } from 'string-similarity';
 import { CardRequestConfig, IProtoCard, QuestionRequestConfig } from 'types';
+import { categories } from './constants';
 
 export function compileQuestionRequest(options: QuestionRequestConfig): string {
 	if (options.internal) {
@@ -23,9 +24,9 @@ export function compileQuestionRequest(options: QuestionRequestConfig): string {
 				search: {
 					query: '',
 					filters: {
-						category: options.categories.map(convertCategory),
-						subcategory: options.subcategories.map(convertSubcategory),
-						difficulty: [...options.difficulties.map((difficulty) => difficultyMap[difficulty])]
+						category: options.categories.map((category) => categories[category].id),
+						subcategory: options.subcategories.map((subcategory) => categories[]),
+						difficulty: options.difficulties.map((difficulty) => difficultyMap[difficulty as keyof typeof difficultyMap])
 					},
 					limit: true,
 					random: options.limit
@@ -61,14 +62,6 @@ export function compileCardRequest(root: string, options: CardRequestConfig): st
 	const limit = options.limit ? `&limit=${options.limit}` : '';
 
 	return req + categories + subcategories + limit;
-}
-
-export function convertCategory(category: string): number {
-	return categoryMap[category];
-}
-
-export function convertSubcategory(subcategory: string): number {
-	return subcategoryMap[subcategory];
 }
 
 export async function processCards(text: string, category: string, subcategory: string, author: string): Promise<IProtoCard[]> {
@@ -119,6 +112,8 @@ export function checkAns(userAns: string, answer: string): boolean {
 							return 'dot';
 						case ':':
 							return 'colon';
+						default:
+							return str;
 					}
 				})
 			) ||
@@ -147,11 +142,12 @@ function cleanCard(card: string) {
 }
 
 export function sort<T>(arr: T[], comparator: (e1: T, e2: T) => 0 | -1 | 1): T[] {
-	return (function qs(lo, hi) {
+	return (function qs(lo, hi): T[] {
 		if (lo < hi) {
 			const splitIdx = partition(arr, lo, hi, comparator);
 			return [...qs(lo, splitIdx), ...qs(splitIdx, hi)];
 		}
+		return [];
 	})(0, arr.length - 1);
 }
 
@@ -179,91 +175,6 @@ function partition<T>(arr: T[], lo: number, hi: number, comparator: (e1: T, e2: 
 		j--;
 	}
 }
-
-const categoryMap = {
-	'Current Events': 26,
-	'Fine Arts': 21,
-	Geography: 20,
-	History: 18,
-	Literature: 15,
-	Mythology: 14,
-	Philosophy: 25,
-	Religion: 19,
-	Science: 17,
-	'Social Science': 22,
-	Trash: 16
-} as const;
-
-const subcategoryMap = {
-	'Literature American': 4,
-	'Literature British': 22,
-	'Literature Classical': 30,
-	'Literature European': 1,
-	'Literature Other': 29,
-	'Literature World': 12,
-	'Science American': 36,
-	'Science Biology': 14,
-	'Science Chemistry': 5,
-	'Science Computer Science': 23,
-	'Science Math': 26,
-	'Science Other': 10,
-	'Science Physics': 18,
-	'Science World': 37,
-	'History American': 13,
-	'History British': 6,
-	'History Classical': 16,
-	'History European': 24,
-	'History Other': 28,
-	'History World': 20,
-	'Fine Arts American': 35,
-	'Fine Arts Audiovisual': 27,
-	'Fine Arts Auditory': 8,
-	'Fine Arts British': 45,
-	'Fine Arts European': 50,
-	'Fine Arts Opera': 77,
-	'Fine Arts Other': 25,
-	'Fine Arts Visual': 2,
-	'Fine Arts World': 43,
-	'Mythology American': 33,
-	'Mythology Chinese': 47,
-	'Mythology Egyptian': 65,
-	'Mythology Greco-Roman': 58,
-	'Mythology Indian': 46,
-	'Mythology Japanese': 48,
-	'Mythology Norse': 63,
-	'Mythology Other': 54,
-	'Mythology Other East Asian': 49,
-	'Religion American': 31,
-	'Religion Christianity': 57,
-	'Religion East Asian': 51,
-	'Religion Islam': 68,
-	'Religion Judaism': 69,
-	'Religion Other': 62,
-	'Geography American': 38,
-	'Geography World': 44,
-	'Philosophy American': 39,
-	'Philosophy Classical': 61,
-	'Philosophy East Asian': 52,
-	'Philosophy European': 66,
-	'Philosophy Other': 74,
-	'Current Events American': 40,
-	'Current Events Other': 42,
-	'Social Science American': 34,
-	'Social Science Anthropology': 76,
-	'Social Science Economics': 56,
-	'Social Science Linguistics': 75,
-	'Social Science Other': 60,
-	'Social Science Political Science': 64,
-	'Social Science Psychology': 71,
-	'Social Science Sociology': 73,
-	'Trash American': 32,
-	'Trash Movies': 72,
-	'Trash Music': 67,
-	'Trash Other': 59,
-	'Trash Sports': 55,
-	'Trash Television': 70,
-	'Trash Video Games': 53
-} as const;
 
 const difficultyMap = {
 	1: 'middle_school',

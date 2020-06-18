@@ -75,7 +75,13 @@ const settingsReducer: React.Reducer<Settings, SettingsAction> = (settings, acti
 		case 'SET_UI_MODE':
 			return { ...settings, ui_mode: action.mode };
 		case 'SET_USER':
-			return action.user === null ? { ...settings, user: null } : { ...settings, user: { ...settings.user, ...action.user } };
+			if (settings.user) {
+				return action.user === null
+					? { ...settings, user: null }
+					: { ...settings, user: { _id: action.user._id || settings.user._id, name: action.user.name || settings.user.name } };
+			} else {
+				return { ...settings, user: { _id: action.user!._id!, name: action.user!.name! } };
+			}
 		default:
 			return settings;
 	}
@@ -89,8 +95,8 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 	const [cards, setCards] = useState<ICard[]>([]);
 	const [questions, setQuestions] = useState<TossupQuestion[]>([]);
 	const [timeDisplay, setTimeDisplay] = useState<number>(0);
-	const [error, setError] = useState<string>(null);
-	const [msg, setMsg] = useState<string>(null);
+	const [error, setError] = useState<string | null>(null);
+	const [msg, setMsg] = useState<string | null>(null);
 	const [allowQuery, setAllowQuery] = useState<boolean>(true);
 	const [timerActive, setTimerActive] = useState<boolean>(false);
 	const [time, setTime] = useState<number>(0);
@@ -180,7 +186,7 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 	const answerTimeout = useCallback(() => {
 		setAnswering(false);
 		setAllowQuery(true);
-		readerRef.current.endQuestion();
+		readerRef.current?.endQuestion();
 	}, [setAnswering]);
 
 	const mainTimeout = useCallback(() => {
@@ -293,8 +299,8 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 							value={eagerName}
 							onChange={(evt) => setEagerName(evt.target.value)}
 							onBlur={(evt) => {
-								if (leaderboardData.leaderboard.map((user) => user.name).includes(evt.target.value)) {
-									const { _id, name } = leaderboardData.leaderboard.find((user) => user.name === evt.target.value);
+								if (leaderboardData?.leaderboard.map((user) => user.name).includes(evt.target.value)) {
+									const { _id, name } = leaderboardData.leaderboard.find((user) => user.name === evt.target.value)!;
 
 									dispatch({ type: 'SET_USER', user: { _id, name } });
 								} else if (!settings.user && evt.target.value !== '') {
@@ -307,7 +313,7 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 										});
 								} else if (evt.target.value !== '') {
 									axios.patch('/api/gateway/user', {
-										_id: settings.user._id,
+										_id: settings.user!._id,
 										name: evt.target.value
 									});
 								} else {
