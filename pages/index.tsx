@@ -23,13 +23,16 @@ import useSWR from 'swr';
 import {
 	AppMode,
 	CardResponse,
+	Category,
 	CreateUserResponse,
+	Difficulty,
 	ICard,
 	LeaderboardResponse,
 	QuestionReaderMethods,
 	QuestionResponse,
 	Settings,
 	SettingsAction,
+	Subcategory,
 	TossupQuestion,
 	UIMode
 } from 'types';
@@ -54,7 +57,7 @@ const settingsReducer: React.Reducer<Settings, SettingsAction> = (settings, acti
 				...settings,
 				subcategories: settings.subcategories.includes(action.subcategory)
 					? settings.subcategories.filter((cat) => cat !== action.subcategory)
-					: [...settings.categories, action.subcategory]
+					: [...settings.subcategories, action.subcategory]
 			};
 		case 'SET_MODE':
 			return {
@@ -75,7 +78,13 @@ const settingsReducer: React.Reducer<Settings, SettingsAction> = (settings, acti
 		case 'SET_UI_MODE':
 			return { ...settings, ui_mode: action.mode };
 		case 'SET_USER':
-			return action.user === null ? { ...settings, user: null } : { ...settings, user: { ...settings.user, ...action.user } };
+			if (settings.user) {
+				return action.user === null
+					? { ...settings, user: null }
+					: { ...settings, user: { _id: action.user._id || settings.user._id, name: action.user.name || settings.user.name } };
+			} else {
+				return { ...settings, user: { _id: action.user!._id!, name: action.user!.name! } };
+			}
 		default:
 			return settings;
 	}
@@ -89,8 +98,8 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 	const [cards, setCards] = useState<ICard[]>([]);
 	const [questions, setQuestions] = useState<TossupQuestion[]>([]);
 	const [timeDisplay, setTimeDisplay] = useState<number>(0);
-	const [error, setError] = useState<string>(null);
-	const [msg, setMsg] = useState<string>(null);
+	const [error, setError] = useState<string | null>(null);
+	const [msg, setMsg] = useState<string | null>(null);
 	const [allowQuery, setAllowQuery] = useState<boolean>(true);
 	const [timerActive, setTimerActive] = useState<boolean>(false);
 	const [time, setTime] = useState<number>(0);
@@ -180,7 +189,7 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 	const answerTimeout = useCallback(() => {
 		setAnswering(false);
 		setAllowQuery(true);
-		readerRef.current.endQuestion();
+		readerRef.current?.endQuestion();
 	}, [setAnswering]);
 
 	const mainTimeout = useCallback(() => {
@@ -231,10 +240,13 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 				)}
 				{answering && <Timer active={answering} time={7500} timeout={answerTimeout} tick={tick} answerTimer />}
 				<form onSubmit={(evt) => evt.preventDefault()}>
-					<CategorySelection onChange={(evt) => dispatch({ type: 'TOGGLE_CATEGORY', category: evt.target.value })} categories={settings.categories} />
+					<CategorySelection
+						onChange={(evt) => dispatch({ type: 'TOGGLE_CATEGORY', category: evt.target.value as Category })}
+						categories={settings.categories}
+					/>
 					<ModeSelection mode={settings.mode} onChange={(evt) => dispatch({ type: 'SET_MODE', mode: evt.target.value as AppMode })} />
 					<SubcategorySelection
-						onChange={(evt) => dispatch({ type: 'TOGGLE_SUBCATEGORY', subcategory: evt.target.value })}
+						onChange={(evt) => dispatch({ type: 'TOGGLE_SUBCATEGORY', subcategory: evt.target.value as Subcategory })}
 						categories={settings.categories}
 						subcategories={settings.subcategories}
 					/>
@@ -279,7 +291,7 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 					)}
 					{settings.mode === 'read' && (
 						<DifficultySelection
-							onChange={(evt) => dispatch({ type: 'TOGGLE_DIFFICULTY', difficulty: parseInt(evt.target.value) })}
+							onChange={(evt) => dispatch({ type: 'TOGGLE_DIFFICULTY', difficulty: parseInt(evt.target.value) as Difficulty })}
 							difficulties={settings.difficulties}
 						/>
 					)}
@@ -293,8 +305,8 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 							value={eagerName}
 							onChange={(evt) => setEagerName(evt.target.value)}
 							onBlur={(evt) => {
-								if (leaderboardData.leaderboard.map((user) => user.name).includes(evt.target.value)) {
-									const { _id, name } = leaderboardData.leaderboard.find((user) => user.name === evt.target.value);
+								if (leaderboardData?.leaderboard.map((user) => user.name).includes(evt.target.value)) {
+									const { _id, name } = leaderboardData.leaderboard.find((user) => user.name === evt.target.value)!;
 
 									dispatch({ type: 'SET_USER', user: { _id, name } });
 								} else if (!settings.user && evt.target.value !== '') {
@@ -307,7 +319,7 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 										});
 								} else if (evt.target.value !== '') {
 									axios.patch('/api/gateway/user', {
-										_id: settings.user._id,
+										_id: settings.user!._id,
 										name: evt.target.value
 									});
 								} else {

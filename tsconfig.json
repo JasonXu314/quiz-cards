@@ -5,7 +5,7 @@
 		"lib": ["dom", "dom.iterable", "esnext"],
 		"allowJs": true,
 		"skipLibCheck": true,
-		"strict": false,
+		"strict": true,
 		"forceConsistentCasingInFileNames": true,
 		"noEmit": true,
 		"esModuleInterop": true,
@@ -19,6 +19,6 @@
 			"@/*": ["util/*"]
 		}
 	},
-	"exclude": ["node_modules", "dist", ".next", "out", "next.config.js"],
+	"exclude": ["node_modules", ".next", "out", "next.config.js"],
 	"include": ["next-env.d.ts", "types.d.ts", "**/*.ts", "**/*.tsx"]
 }

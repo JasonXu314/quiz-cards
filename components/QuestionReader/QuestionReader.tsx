@@ -15,14 +15,14 @@ interface Props {
 	questions: TossupQuestion[];
 	speed: number;
 	setAllowQuery: React.Dispatch<React.SetStateAction<boolean>>;
-	setMsg: React.Dispatch<React.SetStateAction<string>>;
+	setMsg: React.Dispatch<React.SetStateAction<string | null>>;
 	setTime: React.Dispatch<React.SetStateAction<number>>;
 	correct: boolean;
 	setCorrect: React.Dispatch<React.SetStateAction<boolean>>;
 	setTimerActive: React.Dispatch<React.SetStateAction<boolean>>;
 	request: () => void;
 	ui_mode: UIMode;
-	userId: number;
+	userId?: number;
 }
 
 const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Props> = (

@@ -1,13 +1,13 @@
 import ImportCard from '$/ImportCard/ImportCard';
 import StyledInput from '$/StyledInput/StyledInput';
-import { categories, categoryTags, catToSubcat, catToTags } from '@/constants';
+import { categories } from '@/constants';
 import { processCards } from '@/util';
 import axios from 'axios';
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useReducer, useState } from 'react';
-import { ImportCardReducerAction, IProtoCard } from 'types';
+import { Category, ImportCardReducerAction, IProtoCard, Subcategory } from 'types';
 import styles from '../sass/Import.module.scss';
 
 const reducer: React.Reducer<IProtoCard[], ImportCardReducerAction> = (cards, action) => {
@@ -27,8 +27,8 @@ const reducer: React.Reducer<IProtoCard[], ImportCardReducerAction> = (cards, ac
 
 const Import: NextPage<{ url: string }> = ({ url }) => {
 	const [cards, dispatch] = useReducer(reducer, []);
-	const [category, setCategory] = useState<string>('Literature');
-	const [subcategory, setSubcategory] = useState<string>('');
+	const [category, setCategory] = useState<Category>('Literature');
+	const [subcategory, setSubcategory] = useState<Subcategory | null>(null);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState(null);
 	const [page, setPage] = useState<number>(0);
@@ -48,22 +48,22 @@ const Import: NextPage<{ url: string }> = ({ url }) => {
 						<h4>Category:</h4>
 						<select
 							onChange={(evt) => {
-								setCategory(evt.target.value);
-								setSubcategory('');
+								setCategory(evt.target.value as Category);
+								setSubcategory(null);
 							}}
 							value={category}>
-							{categories.map((category, i) => (
-								<option key={categoryTags[i]} value={category}>
-									{category}
+							{Object.entries(categories).map(([categoryName, thisCategory]) => (
+								<option key={thisCategory.id} value={categoryName}>
+									{categoryName}
 								</option>
 							))}
 						</select>
-						{category !== '' && <h4>Subcategory:</h4>}
-						<select onChange={(evt) => setSubcategory(evt.target.value)} value={subcategory}>
+						<h4>Subcategory:</h4>
+						<select onChange={(evt) => setSubcategory(evt.target.value === '' ? null : (evt.target.value as Subcategory))} value={subcategory || ''}>
 							<option value=""></option>
-							{catToSubcat[category].map((subcat: string, i: number) => (
-								<option key={catToTags[category][i]} value={subcat}>
-									{subcat}
+							{Object.entries(categories[category].subcategories).map(([subcategoryName, thisSubcategory]) => (
+								<option key={thisSubcategory.id} value={subcategoryName}>
+									{subcategoryName}
 								</option>
 							))}
 						</select>
@@ -116,7 +116,7 @@ const Import: NextPage<{ url: string }> = ({ url }) => {
 							type="file"
 							onChange={(evt) => {
 								setLoading(true);
-								Array.from(evt.target.files).forEach((file) => {
+								Array.from(evt.target.files!).forEach((file) => {
 									file.text()
 										.then((text) => processCards(text, category, subcategory, author))
 										.then((cards) => {

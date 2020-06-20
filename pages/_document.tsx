@@ -9,16 +9,16 @@ class MyDocument extends Document<{ path: string }> {
 		const initialProps = await Document.getInitialProps(ctx);
 
 		if (ctx.asPath === '/edit/') {
-			ctx.res.writeHead(301, {
+			ctx.res?.writeHead(301, {
 				Location: '/edit'
 			});
-			ctx.res.end();
+			ctx.res?.end();
 		}
 
 		return { ...initialProps, path: ctx.pathname.slice(1) };
 	}
 
-	render() {
+	render(): JSX.Element {
 		return (
 			<Html lang="en">
 				<Head />
