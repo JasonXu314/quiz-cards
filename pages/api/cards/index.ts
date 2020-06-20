@@ -1,6 +1,6 @@
 import { MongoClient, ObjectID } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { CardResponse, ICard } from 'types';
+import { CardResponse, Category, ICard, Subcategory } from 'types';
 
 export default async (req: NextApiRequest, res: NextApiResponse<CardResponse | string>): Promise<void> => {
 	const dbURL =
@@ -37,26 +37,28 @@ export default async (req: NextApiRequest, res: NextApiResponse<CardResponse | s
 				const client = await MongoClient.connect(dbURL, { useUnifiedTopology: true });
 				const db = client.db('cards');
 
-				const categories = [];
+				const categories: Category[] = [];
 				if (typeof req.query.categories === 'string') {
-					categories.push(...req.query.categories.split(/,\s?/));
+					categories.push(...(req.query.categories.split(/,\s?/) as Category[]));
 				} else {
 					res.status(400).send('Categories should be a single string of comma-separated categories');
 					return;
 				}
 
-				const subcategories = [];
+				const subcategories: Subcategory[] = [];
 				if (typeof req.query.subcategories === 'string') {
-					subcategories.push(...req.query.subcategories.split(/,\s?/));
+					subcategories.push(...(req.query.subcategories.split(/,\s?/) as Subcategory[]));
 				} else if (typeof req.query.subcategories !== 'undefined') {
 					res.status(400).send('Subcategories should be a single string of comma-separated subcategories');
+					return;
 				}
 
-				let limit: number;
+				let limit: number = 50;
 				if (typeof req.query.limit === 'string') {
 					limit = parseInt(req.query.limit);
 				} else if (typeof req.query.limit !== 'undefined') {
 					res.status(400).send('Limit must be a single integer value');
+					return;
 				}
 
 				let cards = await db

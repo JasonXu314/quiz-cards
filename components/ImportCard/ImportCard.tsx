@@ -1,6 +1,6 @@
-import { categories, categoryTags, catToSubcat, catToTags } from '@/constants';
+import { categories } from '@/constants';
 import { memo, useState } from 'react';
-import { ImportCardReducerAction, IProtoCard } from 'types';
+import { Category, ImportCardReducerAction, IProtoCard, Subcategory } from 'types';
 import styles from './ImportCard.module.scss';
 
 interface Props {
@@ -11,8 +11,8 @@ interface Props {
 
 const ImportCard: React.FC<Props> = memo(
 	({ card, dispatch, index }) => {
-		const [category, setCategory] = useState<string>(card.category);
-		const [subcategory, setSubcategory] = useState<string>(card.subcategory);
+		const [category, setCategory] = useState<Category>(card.category);
+		const [subcategory, setSubcategory] = useState<Subcategory | null>(card.subcategory);
 
 		return (
 			<div className={styles.main}>
@@ -23,26 +23,28 @@ const ImportCard: React.FC<Props> = memo(
 					className={styles.category}
 					value={category}
 					onChange={(evt) => {
-						setCategory(evt.target.value);
-						dispatch({ type: 'CATEGORY', i: index, category: evt.target.value });
+						const newCategory = evt.target.value as Category;
+						setCategory(newCategory);
+						dispatch({ type: 'CATEGORY', i: index, category: newCategory });
 					}}>
-					{categories.map((category, i) => (
-						<option key={categoryTags[i]} value={category}>
-							{category}
+					{Object.entries(categories).map(([categoryName, category]) => (
+						<option key={category.id} value={categoryName}>
+							{categoryName}
 						</option>
 					))}
 				</select>
 				<select
 					className={styles.subcategory}
-					value={subcategory}
+					value={subcategory || ''}
 					onChange={(evt) => {
-						setSubcategory(evt.target.value);
-						dispatch({ type: 'SUBCATEGORY', i: index, subcategory: evt.target.value });
+						const newSubategory = evt.target.value as Subcategory;
+						setSubcategory(newSubategory);
+						dispatch({ type: 'SUBCATEGORY', i: index, subcategory: newSubategory });
 					}}>
 					<option value=""></option>
-					{catToSubcat[card.category].map((subcat: string, i: number) => (
-						<option key={catToTags[card.category][i]} value={subcat}>
-							{subcat}
+					{Object.entries(categories[category].subcategories).map(([subcategoryName, subcategory]) => (
+						<option key={subcategory.id} value={subcategoryName}>
+							{subcategoryName}
 						</option>
 					))}
 				</select>

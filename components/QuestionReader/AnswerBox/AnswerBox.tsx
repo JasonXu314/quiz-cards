@@ -12,7 +12,7 @@ const AnswerBox: React.FC<Props> = ({ value, onChange, onSubmit }) => {
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
-		inputRef.current.focus();
+		inputRef.current?.focus();
 	});
 
 	return (

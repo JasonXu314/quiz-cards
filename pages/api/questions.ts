@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { QuestionResponse, QuizDBResponse } from 'types';
 
 export default async (req: NextApiRequest, res: NextApiResponse<QuestionResponse | string>): Promise<void> => {
-	const preFormatReq = {
+	const preFormatReq: any = {
 		categories: null,
 		limit: null,
 		subcategories: null,

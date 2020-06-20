@@ -1,4 +1,3 @@
-import { categories } from '@/constants';
 import { ObjectId } from 'mongodb';
 
 interface TossupQuestion {
@@ -133,8 +132,8 @@ interface UsedQuestion {
 interface ICard {
 	hint: string;
 	answer: string;
-	subcategory: string | null;
-	category: string;
+	subcategory: Subcategory | null;
+	category: Category;
 	_id: string;
 	author: string | null;
 }
@@ -142,8 +141,8 @@ interface ICard {
 interface IProtoCard {
 	hint: string;
 	answer: string;
-	category: string;
-	subcategory: string | null;
+	category: Category;
+	subcategory: Subcategory | null;
 	author: string | null;
 }
 
@@ -170,11 +169,11 @@ interface DBUser {
 }
 
 interface QuestionRequestConfig {
-	categories: (keyof typeof categories)[];
+	categories: Category[];
 	limit: number;
 	internal: boolean;
-	subcategories: string[];
-	difficulties: number[];
+	subcategories: Subcategory[];
+	difficulties: Difficulty[];
 }
 
 interface CardRequestConfig {
@@ -197,11 +196,81 @@ type Category =
 	| 'Current Events'
 	| 'Social Science'
 	| 'Trash';
+type Subcategory =
+	| 'Literature American'
+	| 'Literature British'
+	| 'Literature Classical'
+	| 'Literature European'
+	| 'Literature Other'
+	| 'Literature World'
+	| 'Science American'
+	| 'Science Biology'
+	| 'Science Chemistry'
+	| 'Science Computer Science'
+	| 'Science Math'
+	| 'Science Other'
+	| 'Science Physics'
+	| 'Science World'
+	| 'History American'
+	| 'History British'
+	| 'History Classical'
+	| 'History European'
+	| 'History Other'
+	| 'History World'
+	| 'Fine Arts American'
+	| 'Fine Arts Audiovisual'
+	| 'Fine Arts Auditory'
+	| 'Fine Arts British'
+	| 'Fine Arts European'
+	| 'Fine Arts Opera'
+	| 'Fine Arts Other'
+	| 'Fine Arts Visual'
+	| 'Fine Arts World'
+	| 'Mythology American'
+	| 'Mythology Chinese'
+	| 'Mythology Egyptian'
+	| 'Mythology Greco-Roman'
+	| 'Mythology Indian'
+	| 'Mythology Japanese'
+	| 'Mythology Norse'
+	| 'Mythology Other'
+	| 'Mythology Other East Asian'
+	| 'Religion American'
+	| 'Religion Christianity'
+	| 'Religion East Asian'
+	| 'Religion Islam'
+	| 'Religion Judaism'
+	| 'Religion Other'
+	| 'Geography American'
+	| 'Geography World'
+	| 'Philosophy American'
+	| 'Philosophy Classical'
+	| 'Philosophy East Asian'
+	| 'Philosophy European'
+	| 'Philosophy Other'
+	| 'Current Events American'
+	| 'Current Events Other'
+	| 'Social Science American'
+	| 'Social Science Anthropology'
+	| 'Social Science Economics'
+	| 'Social Science Linguistics'
+	| 'Social Science Other'
+	| 'Social Science Political Science'
+	| 'Social Science Psychology'
+	| 'Social Science Sociology'
+	| 'Trash American'
+	| 'Trash Movies'
+	| 'Trash Music'
+	| 'Trash Other'
+	| 'Trash Sports'
+	| 'Trash Television'
+	| 'Trash Video Games';
+type Difficulty = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 type ImportCardReducerAction =
 	| { type: 'SET'; cards: IProtoCard[] }
-	| { type: 'CATEGORY'; i: number; category: string }
-	| { type: 'SUBCATEGORY'; i: number; subcategory: string };
+	| { type: 'CATEGORY'; i: number; category: Category }
+	| { type: 'SUBCATEGORY'; i: number; subcategory: Subcategory };
 
 interface QuestionReaderMethods {
 	endQuestion: () => void;
@@ -209,9 +278,9 @@ interface QuestionReaderMethods {
 }
 
 interface Settings {
-	categories: string[];
-	subcategories: string[];
-	difficulties: number[];
+	categories: Category[];
+	subcategories: Subcategory[];
+	difficulties: Difficulty[];
 	mode: AppMode;
 	ui_mode: UIMode;
 	useLimit: boolean;
@@ -222,10 +291,10 @@ interface Settings {
 
 type SettingsAction =
 	| { type: 'LOAD'; settings: Settings }
-	| { type: 'TOGGLE_CATEGORY'; category: string }
-	| { type: 'TOGGLE_SUBCATEGORY'; subcategory: string }
+	| { type: 'TOGGLE_CATEGORY'; category: Category }
+	| { type: 'TOGGLE_SUBCATEGORY'; subcategory: Subcategory }
 	| { type: 'SET_MODE'; mode: AppMode }
-	| { type: 'TOGGLE_DIFFICULTY'; difficulty: number }
+	| { type: 'TOGGLE_DIFFICULTY'; difficulty: Difficulty }
 	| { type: 'SET_LIMIT'; limit: number }
 	| { type: 'SET_SPEED'; speed: number }
 	| { type: 'SET_USE_LIMIT'; useLimit: boolean }

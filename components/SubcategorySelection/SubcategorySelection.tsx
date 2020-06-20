@@ -1,15 +1,18 @@
 import ChevronDown from '$/ChevronDown/ChevronDown';
 import ChevronUp from '$/ChevronUp/ChevronUp';
-import { categories as cats, categoryTags, catToSubcat, catToTags } from '@/constants';
+import { categories as cats } from '@/constants';
 import { useEffect, useReducer } from 'react';
+import { Category } from 'types';
 
 interface Props {
 	onChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
-	categories: string[];
+	categories: Category[];
 	subcategories: string[];
 }
 
-const reducer: React.Reducer<{ [key: string]: boolean }, string> = (map, category) => {
+type CategoryMap = { [key in keyof typeof cats]: boolean };
+
+const reducer: React.Reducer<CategoryMap, Category> = (map, category) => {
 	return {
 		...map,
 		[category]: !map[category]
@@ -17,10 +20,10 @@ const reducer: React.Reducer<{ [key: string]: boolean }, string> = (map, categor
 };
 
 const SubcategorySelection: React.FC<Props> = ({ onChange, categories, subcategories }) => {
-	const [expanded, expandedDispatch] = useReducer(reducer, Object.fromEntries(cats.map((category) => [category, false])));
+	const [expanded, expandedDispatch] = useReducer(reducer, Object.fromEntries(Object.keys(cats).map((category) => [category, false])) as CategoryMap);
 
 	useEffect(() => {
-		const changed = Object.entries(expanded).filter(([key, exp]) => !categories.includes(key) && exp);
+		const changed = (Object.entries(expanded) as [Category, boolean][]).filter(([key, exp]) => !categories.includes(key) && exp);
 		if (changed.length === 0) {
 			return;
 		} else {
@@ -31,8 +34,8 @@ const SubcategorySelection: React.FC<Props> = ({ onChange, categories, subcatego
 	return (
 		<div>
 			<h4>Subcategory Selection</h4>
-			{categories.map((category, i) => (
-				<div key={categoryTags[i]}>
+			{categories.map((category) => (
+				<div key={cats[category].id}>
 					<h5>
 						{category}{' '}
 						{expanded[category] ? (
@@ -43,16 +46,16 @@ const SubcategorySelection: React.FC<Props> = ({ onChange, categories, subcatego
 					</h5>
 					{expanded[category] && (
 						<>
-							{catToSubcat[category].map((subcategory: string, i: number) => (
-								<div key={catToTags[category][i]}>
+							{Object.entries(cats[category].subcategories).map(([subcategoryName, subcategory]) => (
+								<div key={subcategory.id}>
 									<input
 										onChange={onChange}
 										type="checkbox"
-										id={catToTags[category][i]}
-										value={subcategory}
-										checked={subcategories.includes(subcategory)}
+										id={subcategory.tag}
+										value={subcategoryName}
+										checked={subcategories.includes(subcategoryName)}
 									/>
-									<label htmlFor={catToTags[category][i]}>{subcategory}</label>
+									<label htmlFor={subcategory.tag}>{subcategoryName}</label>
 								</div>
 							))}
 						</>

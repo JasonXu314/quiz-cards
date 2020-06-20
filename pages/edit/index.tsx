@@ -1,16 +1,16 @@
-import { categories, categoryTags, catToSubcat, catToTags } from '@/constants';
+import { categories } from '@/constants';
 import { compileCardRequest } from '@/util';
 import axios from 'axios';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useState } from 'react';
-import { CardResponse, ICard } from 'types';
+import { CardResponse, Category, ICard, Subcategory } from 'types';
 import styles from '../../sass/EditIndex.module.scss';
 
 const Index: NextPage = () => {
-	const [category, setCategory] = useState<string>('');
-	const [subcategory, setSubcategory] = useState<string>('');
+	const [category, setCategory] = useState<Category | ''>('');
+	const [subcategory, setSubcategory] = useState<Subcategory | ''>('');
 	const [page, setPage] = useState<number>(0);
 	const [cards, setCards] = useState<ICard[]>([]);
 
@@ -23,25 +23,25 @@ const Index: NextPage = () => {
 				<h4>Category:</h4>
 				<select
 					onChange={(evt) => {
-						setCategory(evt.target.value);
+						setCategory(evt.target.value as Category);
 						setSubcategory('');
 					}}
 					value={category}>
 					<option value=""></option>
-					{categories.map((category, i) => (
-						<option key={categoryTags[i]} value={category}>
-							{category}
+					{Object.entries(categories).map(([categoryName, category]) => (
+						<option key={category.id} value={categoryName}>
+							{categoryName}
 						</option>
 					))}
 				</select>
 				{category !== '' && (
 					<>
 						<h4>Subcategory:</h4>
-						<select onChange={(evt) => setSubcategory(evt.target.value)} value={subcategory}>
+						<select onChange={(evt) => setSubcategory(evt.target.value as Subcategory)} value={subcategory}>
 							<option value=""></option>
-							{catToSubcat[category].map((subcat: string, i: number) => (
-								<option key={catToTags[category][i]} value={subcat}>
-									{subcat}
+							{Object.entries(categories[category].subcategories).map(([subcategoryName, subcategory]) => (
+								<option key={subcategory.id} value={subcategoryName}>
+									{subcategoryName}
 								</option>
 							))}
 						</select>

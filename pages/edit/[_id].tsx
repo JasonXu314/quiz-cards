@@ -1,15 +1,15 @@
 import StyledButton from '$/StyledButton/StyledButton';
-import { categories, categoryTags, catToSubcat, catToTags } from '@/constants';
+import { categories } from '@/constants';
 import axios from 'axios';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import Router from 'next/router';
 import { useEffect, useState } from 'react';
-import { ICard } from 'types';
+import { Category, ICard, Subcategory } from 'types';
 import styles from '../../sass/Edit_id.module.scss';
 
 const Page: NextPage = () => {
-	const [card, setCard] = useState<ICard>(null);
+	const [card, setCard] = useState<ICard | null>(null);
 	const [confirming, setConfirming] = useState<boolean>(false);
 
 	useEffect(() => {
@@ -43,22 +43,22 @@ const Page: NextPage = () => {
 					<div className={styles.form}>
 						<select
 							onChange={(evt) => {
-								setCard({ ...card, category: evt.target.value, subcategory: '' });
+								setCard({ ...card, category: evt.target.value as Category, subcategory: null });
 							}}
 							value={card.category}>
-							{categories.map((category, i) => (
-								<option key={categoryTags[i]} value={category}>
-									{category}
+							{Object.entries(categories).map(([categoryName, category]) => (
+								<option key={category.id} value={categoryName}>
+									{categoryName}
 								</option>
 							))}
 						</select>
 					</div>
 					<div className={styles.form}>
-						<select onChange={(evt) => setCard({ ...card, subcategory: evt.target.value })} value={card.subcategory || ''}>
+						<select onChange={(evt) => setCard({ ...card, subcategory: evt.target.value as Subcategory })} value={card.subcategory || ''}>
 							<option value=""></option>
-							{catToSubcat[card.category].map((subcat: string, i: number) => (
-								<option key={catToTags[card.category][i]} value={subcat}>
-									{subcat}
+							{Object.entries(categories[card.category].subcategories).map(([subcategoryName, subcategory]) => (
+								<option key={subcategory.id} value={subcategoryName}>
+									{subcategoryName}
 								</option>
 							))}
 						</select>

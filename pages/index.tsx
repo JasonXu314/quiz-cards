@@ -23,13 +23,16 @@ import useSWR from 'swr';
 import {
 	AppMode,
 	CardResponse,
+	Category,
 	CreateUserResponse,
+	Difficulty,
 	ICard,
 	LeaderboardResponse,
 	QuestionReaderMethods,
 	QuestionResponse,
 	Settings,
 	SettingsAction,
+	Subcategory,
 	TossupQuestion,
 	UIMode
 } from 'types';
@@ -54,7 +57,7 @@ const settingsReducer: React.Reducer<Settings, SettingsAction> = (settings, acti
 				...settings,
 				subcategories: settings.subcategories.includes(action.subcategory)
 					? settings.subcategories.filter((cat) => cat !== action.subcategory)
-					: [...settings.categories, action.subcategory]
+					: [...settings.subcategories, action.subcategory]
 			};
 		case 'SET_MODE':
 			return {
@@ -237,10 +240,13 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 				)}
 				{answering && <Timer active={answering} time={7500} timeout={answerTimeout} tick={tick} answerTimer />}
 				<form onSubmit={(evt) => evt.preventDefault()}>
-					<CategorySelection onChange={(evt) => dispatch({ type: 'TOGGLE_CATEGORY', category: evt.target.value })} categories={settings.categories} />
+					<CategorySelection
+						onChange={(evt) => dispatch({ type: 'TOGGLE_CATEGORY', category: evt.target.value as Category })}
+						categories={settings.categories}
+					/>
 					<ModeSelection mode={settings.mode} onChange={(evt) => dispatch({ type: 'SET_MODE', mode: evt.target.value as AppMode })} />
 					<SubcategorySelection
-						onChange={(evt) => dispatch({ type: 'TOGGLE_SUBCATEGORY', subcategory: evt.target.value })}
+						onChange={(evt) => dispatch({ type: 'TOGGLE_SUBCATEGORY', subcategory: evt.target.value as Subcategory })}
 						categories={settings.categories}
 						subcategories={settings.subcategories}
 					/>
@@ -285,7 +291,7 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 					)}
 					{settings.mode === 'read' && (
 						<DifficultySelection
-							onChange={(evt) => dispatch({ type: 'TOGGLE_DIFFICULTY', difficulty: parseInt(evt.target.value) })}
+							onChange={(evt) => dispatch({ type: 'TOGGLE_DIFFICULTY', difficulty: parseInt(evt.target.value) as Difficulty })}
 							difficulties={settings.difficulties}
 						/>
 					)}

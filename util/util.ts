@@ -1,8 +1,8 @@
 import { toWords } from 'number-to-words';
 import qs from 'qs';
 import { compareTwoStrings } from 'string-similarity';
-import { CardRequestConfig, IProtoCard, QuestionRequestConfig } from 'types';
-import { categories } from './constants';
+import { CardRequestConfig, Category, Difficulty, IProtoCard, QuestionRequestConfig, Subcategory } from 'types';
+import { categories, subcategories } from './constants';
 
 export function compileQuestionRequest(options: QuestionRequestConfig): string {
 	if (options.internal) {
@@ -25,8 +25,8 @@ export function compileQuestionRequest(options: QuestionRequestConfig): string {
 					query: '',
 					filters: {
 						category: options.categories.map((category) => categories[category].id),
-						subcategory: options.subcategories.map((subcategory) => categories[]),
-						difficulty: options.difficulties.map((difficulty) => difficultyMap[difficulty as keyof typeof difficultyMap])
+						subcategory: options.subcategories.map((subcategory) => subcategories[subcategory].id),
+						difficulty: options.difficulties.map((difficulty) => difficultyMap[difficulty as Difficulty])
 					},
 					limit: true,
 					random: options.limit
@@ -64,7 +64,7 @@ export function compileCardRequest(root: string, options: CardRequestConfig): st
 	return req + categories + subcategories + limit;
 }
 
-export async function processCards(text: string, category: string, subcategory: string, author: string): Promise<IProtoCard[]> {
+export async function processCards(text: string, category: Category, subcategory: Subcategory | null, author: string): Promise<IProtoCard[]> {
 	return new Promise((resolve) => {
 		const raw = text.split(/;?\n/);
 		raw.pop();

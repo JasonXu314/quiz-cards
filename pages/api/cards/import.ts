@@ -18,7 +18,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 				const client = await MongoClient.connect(dbURL, { useUnifiedTopology: true });
 				const db = client.db('cards');
 
-				await db.collection('cards').insertMany(cards.map((card) => ({ ...card, subcategory: card.subcategory === '' ? null : card.subcategory })));
+				await db.collection('cards').insertMany(cards.map((card) => ({ ...card, subcategory: card.subcategory })));
 				res.status(200).send('Cards Imported!');
 			} catch (err) {
 				console.log(err);
