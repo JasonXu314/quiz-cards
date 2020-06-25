@@ -17,24 +17,29 @@ import Cookies from 'js-cookie';
 import Head from 'next/head';
 import Link from 'next/link';
 import { GetServerSideProps, NextPage } from 'next/types';
+import Pusher from 'pusher-js';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import useSWR from 'swr';
+// import useSWR from 'swr';
 import {
 	AppMode,
 	CardResponse,
 	Category,
+	CreateUserEvent,
 	CreateUserResponse,
 	Difficulty,
 	ICard,
 	LeaderboardResponse,
+	NameChangeEvent,
 	QuestionReaderMethods,
 	QuestionResponse,
+	ScoreChangeEvent,
 	Settings,
 	SettingsAction,
 	Subcategory,
 	TossupQuestion,
-	UIMode
+	UIMode,
+	User
 } from 'types';
 import styles from '../sass/Index.module.scss';
 
@@ -107,13 +112,7 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 	const [answering, setAnswering] = useRecoilState(answeringState);
 	const [eagerName, setEagerName] = useState<string>(initialSettings?.user?.name || '');
 	const readerRef = useRef<QuestionReaderMethods>(null);
-	const { data: leaderboardData, error: leaderboardError } = useSWR(
-		'/api/gateway/leaderboard',
-		useCallback(async (url) => (await axios.get<LeaderboardResponse>(url)).data, []),
-		{
-			refreshInterval: 1
-		}
-	);
+	const [leaderboard, setLeaderboard] = useState<User[]>([]);
 	const [settings, dispatch] = useReducer<typeof settingsReducer, Settings>(
 		settingsReducer,
 		initialSettings,
@@ -222,6 +221,42 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 		};
 	}, [keypressHandler]);
 
+	useEffect(() => {
+		const pusherClient = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, { cluster: 'us2' });
+		const channel = pusherClient.subscribe('quiz-cards-main');
+
+		channel.bind('SCORE_CHANGE', (evt: ScoreChangeEvent) => {
+			setLeaderboard((leaderboard) =>
+				leaderboard.map((user) => {
+					if (user._id !== evt.userId) {
+						return user;
+					} else {
+						switch (evt.type) {
+							case 'NEG':
+								return { ...user, score: user.score - 5 };
+							case 'POWER':
+								return { ...user, score: user.score + 15 };
+							case 'TEN':
+								return { ...user, score: user.score + 10 };
+						}
+					}
+				})
+			);
+		});
+
+		channel.bind('NAME_CHANGE', (evt: NameChangeEvent) => {
+			setLeaderboard((leaderboard) => leaderboard.map((user) => (user._id === evt.userId ? { ...user, name: evt.name } : user)));
+		});
+
+		channel.bind('CREATE_USER', (evt: CreateUserEvent) => {
+			setLeaderboard((leaderboard) => leaderboard.concat(evt.user));
+		});
+
+		axios.get<LeaderboardResponse>('/api/gateway/leaderboard').then((res) => {
+			setLeaderboard(res.data.leaderboard);
+		});
+	}, []);
+
 	return (
 		<div className={styles.main}>
 			<Head>
@@ -305,8 +340,8 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 							value={eagerName}
 							onChange={(evt) => setEagerName(evt.target.value)}
 							onBlur={(evt) => {
-								if (leaderboardData?.leaderboard.map((user) => user.name).includes(evt.target.value)) {
-									const { _id, name } = leaderboardData.leaderboard.find((user) => user.name === evt.target.value)!;
+								if (leaderboard.map((user) => user.name).includes(evt.target.value)) {
+									const { _id, name } = leaderboard.find((user) => user.name === evt.target.value)!;
 
 									dispatch({ type: 'SET_USER', user: { _id, name } });
 								} else if (!settings.user && evt.target.value !== '') {
@@ -349,17 +384,11 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 					<h4>Note:</h4> this site uses cookies to persist settings between sessions. Disable button coming soon!
 				</div>
 				<div className={styles.leaderboard}>
-					{leaderboardError ? (
-						<div className={styles.entry}>Error loading leaderboard...</div>
-					) : leaderboardData ? (
-						leaderboardData.leaderboard.map((user) => (
-							<div key={user._id} className={styles.entry}>
-								<h4>{user.name}</h4> {user.score}
-							</div>
-						))
-					) : (
-						<div className={styles.entry}>Loading...</div>
-					)}
+					{leaderboard.map((user) => (
+						<div key={user._id} className={styles.entry}>
+							<h4>{user.name}</h4> {user.score}
+						</div>
+					))}
 				</div>
 			</div>
 

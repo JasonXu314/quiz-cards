@@ -149,17 +149,17 @@ interface IProtoCard {
 interface User {
 	name: string;
 	score: number;
-	_id: number;
+	_id: string;
 }
 
 interface UserWithoutScore {
 	name: string;
-	_id: number;
+	_id: string;
 }
 
 interface PartialUser {
 	name?: string;
-	_id?: number;
+	_id?: string;
 }
 
 interface DBUser {
@@ -266,6 +266,7 @@ type Subcategory =
 	| 'Trash Television'
 	| 'Trash Video Games';
 type Difficulty = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+type ScoreType = 'TEN' | 'NEG' | 'POWER';
 
 type ImportCardReducerAction =
 	| { type: 'SET'; cards: IProtoCard[] }
@@ -310,6 +311,20 @@ interface CreateUserResponse {
 }
 
 interface ScorePost {
-	_id: number;
-	type: 'TEN' | 'NEG' | 'POWER';
+	_id: string;
+	type: ScoreType;
+}
+
+interface ScoreChangeEvent {
+	userId: string;
+	type: ScoreType;
+}
+
+interface NameChangeEvent {
+	userId: string;
+	name: string;
+}
+
+interface CreateUserEvent {
+	user: User;
 }

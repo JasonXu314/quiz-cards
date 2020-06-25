@@ -22,7 +22,7 @@ interface Props {
 	setTimerActive: React.Dispatch<React.SetStateAction<boolean>>;
 	request: () => void;
 	ui_mode: UIMode;
-	userId?: number;
+	userId?: string;
 }
 
 const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Props> = (

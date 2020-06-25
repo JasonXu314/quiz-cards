@@ -9,6 +9,8 @@
 		"mongodb": "^3.5.9",
 		"next": "^9.4.2",
 		"number-to-words": "^1.2.4",
+		"pusher": "^3.0.1",
+		"pusher-js": "^6.0.3",
 		"qs": "^6.9.4",
 		"react": "^16.13.1",
 		"react-dom": "^16.13.1",

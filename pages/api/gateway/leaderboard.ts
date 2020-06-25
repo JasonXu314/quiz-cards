@@ -3,10 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { LeaderboardResponse } from 'types';
 
 export default async (req: NextApiRequest, res: NextApiResponse<LeaderboardResponse | string>): Promise<void> => {
-	const dbURL =
-		process.env.NODE_ENV === 'development'
-			? 'mongodb://localhost:27017'
-			: `mongodb+srv://Me:${process.env.MONGODB_PASSWORD}@quiz-cards-cluster-hwc6f.mongodb.net/test?retryWrites=true&w=majority`;
+	const dbURL = process.env.MONGODB_URL!;
 
 	try {
 		const client = await MongoClient.connect(dbURL, { useUnifiedTopology: true });
