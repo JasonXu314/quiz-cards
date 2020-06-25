@@ -1,3 +1,5 @@
+import cookie from 'cookie';
+import { IncomingMessage } from 'http';
 import { toWords } from 'number-to-words';
 import qs from 'qs';
 import { compareTwoStrings } from 'string-similarity';
@@ -174,6 +176,10 @@ function partition<T>(arr: T[], lo: number, hi: number, comparator: (e1: T, e2: 
 		i++;
 		j--;
 	}
+}
+
+export function parseCookies(req: IncomingMessage): Record<string, string> {
+	return cookie.parse(req.headers.cookie || '');
 }
 
 const difficultyMap = {

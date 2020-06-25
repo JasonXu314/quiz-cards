@@ -9,10 +9,8 @@ import SubcategorySelection from '$/SubcategorySelection/SubcategorySelection';
 import Timer from '$/Timer';
 import UIModeSelector from '$/UIModeSelector/UIModeSelector';
 import { answeringState } from '@/atoms';
-import { compileCardRequest, compileQuestionRequest } from '@/util';
+import { compileCardRequest, compileQuestionRequest, parseCookies } from '@/util';
 import axios from 'axios';
-import cookie from 'cookie';
-import { IncomingMessage } from 'http';
 import Cookies from 'js-cookie';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -252,7 +250,7 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 					/>
 					<hr />
 					{settings.mode === 'read' && (
-						<UIModeSelector onChange={(evt) => dispatch({ type: 'SET_UI_MODE', mode: evt.target.value as UIMode })} ui_mode={settings.ui_mode} />
+						<UIModeSelector onChange={(evt) => dispatch({ type: 'SET_UI_MODE', mode: evt.target.value as UIMode })} uiMode={settings.ui_mode} />
 					)}
 					<LimitSelector
 						onLimitChange={(evt) => {
@@ -390,10 +388,6 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 		</div>
 	);
 };
-
-function parseCookies(req: IncomingMessage) {
-	return cookie.parse(req.headers.cookie || '');
-}
 
 export const getServerSideProps: GetServerSideProps<IndexInitialProps> = async ({ req }) => {
 	const cookies = parseCookies(req);

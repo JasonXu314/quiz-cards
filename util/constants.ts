@@ -1,3 +1,5 @@
+import { Category, ICategory, ISubcategory, Subcategory } from 'types';
+
 export const difNumToString = {
 		1: '1 (Middle School)',
 		2: '2 (Easy High School)',
@@ -359,8 +361,22 @@ export const categories = {
 				id: 53
 			}
 		}
+	},
+	get entries(): [Category, ICategory][] {
+		const entries: [Category, ICategory][] = [];
+
+		for (const key in this) {
+			if (key === 'entries') {
+				continue;
+			} else {
+				const k = key as Category;
+				entries.push([k, this[k]]);
+			}
+		}
+
+		return entries;
 	}
-};
+} as Record<Category, ICategory> & { entries: [Category, ICategory][] };
 
 export const subcategories = {
 	'Literature American': {
@@ -703,4 +719,4 @@ export const subcategories = {
 		id: 53,
 		categoryName: 'Trash'
 	}
-};
+} as Record<Subcategory, ISubcategory>;

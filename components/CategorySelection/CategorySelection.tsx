@@ -17,7 +17,7 @@ const CategorySelection: React.FC<Props> = ({ onChange, categories }) => {
 			<h4>Categories {expanded ? <ChevronUp onClick={() => setExpanded(false)} /> : <ChevronDown onClick={() => setExpanded(true)} />}</h4>
 			{expanded && (
 				<>
-					{Object.entries(cats).map(([category, { id }]) => (
+					{cats.entries.map(([category, { id }]) => (
 						<div key={id} className={styles.category}>
 							<input onChange={onChange} type="checkbox" id={'category' + id} value={category} checked={categories.includes(category)} />
 							<label htmlFor={'category' + id}>{category}</label>

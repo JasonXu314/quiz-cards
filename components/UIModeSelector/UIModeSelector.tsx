@@ -3,20 +3,20 @@ import styles from './UIModeSelector.module.scss';
 
 interface Props {
 	onChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
-	ui_mode: UIMode;
+	uiMode: UIMode;
 }
 
-const UIModeSelector: React.FC<Props> = ({ onChange, ui_mode }) => {
+const UIModeSelector: React.FC<Props> = ({ onChange, uiMode }) => {
 	return (
 		<div className={styles.main}>
 			<h4>UI Mode:</h4>
 			<div className={styles.row}>
 				<div className={styles.group}>
-					<input type="radio" id="ui-mode-protobowl" value="protobowl" checked={ui_mode === 'protobowl'} onChange={onChange} />
+					<input type="radio" id="ui-mode-protobowl" value="protobowl" checked={uiMode === 'protobowl'} onChange={onChange} />
 					<label htmlFor="ui-mode-protobowl">Protobowl</label>
 				</div>
 				<div className={styles.group}>
-					<input type="radio" id="ui-mode-tabled" value="tabled" checked={ui_mode === 'tabled'} onChange={onChange} />
+					<input type="radio" id="ui-mode-tabled" value="tabled" checked={uiMode === 'tabled'} onChange={onChange} />
 					<label htmlFor="ui-mode-tabled">Tabled</label>
 				</div>
 			</div>

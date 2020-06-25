@@ -149,17 +149,17 @@ interface IProtoCard {
 interface User {
 	name: string;
 	score: number;
-	_id: number;
+	_id: string;
 }
 
 interface UserWithoutScore {
 	name: string;
-	_id: number;
+	_id: string;
 }
 
 interface PartialUser {
 	name?: string;
-	_id?: number;
+	_id?: string;
 }
 
 interface DBUser {
@@ -289,6 +289,12 @@ interface Settings {
 	user: UserWithoutScore | null;
 }
 
+interface RoomSettings {
+	distro: Record<Category, number>;
+	difficulties: Difficulty[];
+	speed: number;
+}
+
 type SettingsAction =
 	| { type: 'LOAD'; settings: Settings }
 	| { type: 'TOGGLE_CATEGORY'; category: Category }
@@ -301,6 +307,8 @@ type SettingsAction =
 	| { type: 'SET_UI_MODE'; mode: UIMode }
 	| { type: 'SET_USER'; user: PartialUser | null };
 
+type RoomSettingsAction = { type: 'TOGGLE_DIFFICULTY'; difficulty: Difficulty } | { type: 'SET_SPEED'; speed: number };
+
 interface CreateUserPost {
 	name: string;
 }
@@ -312,4 +320,28 @@ interface CreateUserResponse {
 interface ScorePost {
 	_id: number;
 	type: 'TEN' | 'NEG' | 'POWER';
+}
+
+interface IRoom<T extends 'server' | 'client'> {
+	_id: T extends 'server' ? ObjectId : string;
+	name: string;
+	ownerId: T extends 'server' ? ObjectId : string;
+	users: UserWithoutScore[];
+	settings: RoomSettings;
+}
+
+interface ICategory {
+	tag: string;
+	id: number;
+	subcategories: Record<Subcategory, ISubcategory>;
+}
+
+interface ISubcategory {
+	tag: string;
+	id: number;
+}
+
+interface ScoreChangeEvent {
+	userId: string;
+	score: number;
 }
