@@ -1,26 +1,26 @@
 import { compileQuestionRequest } from '@/util';
 import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { QuestionResponse, QuizDBResponse } from 'types';
+import { Category, Difficulty, QuestionRequestConfig, QuestionResponse, QuizDBResponse, Subcategory } from 'types';
 
 export default async (req: NextApiRequest, res: NextApiResponse<QuestionResponse | string>): Promise<void> => {
-	const preFormatReq: any = {
-		categories: null,
-		limit: null,
-		subcategories: null,
-		difficulties: null,
+	const preFormatReq: QuestionRequestConfig = {
+		categories: [],
+		limit: 50,
+		subcategories: [],
+		difficulties: [],
 		internal: false
 	};
 
 	if (typeof req.query.categories === 'string') {
-		preFormatReq.categories = [...req.query.categories.split(/,\s?/)];
+		preFormatReq.categories = [...req.query.categories.split(/,\s?/)] as Category[];
 	} else {
 		res.status(400).json('Categories should be a single string of comma-separated values');
 		return;
 	}
 
 	if (typeof req.query.subcategories === 'string') {
-		preFormatReq.subcategories = [...req.query.subcategories.split(/,\s?/)];
+		preFormatReq.subcategories = [...req.query.subcategories.split(/,\s?/)] as Subcategory[];
 	} else {
 		res.status(400).json('Subcategories should be a single string of comma-separated values');
 		return;
@@ -34,7 +34,7 @@ export default async (req: NextApiRequest, res: NextApiResponse<QuestionResponse
 	}
 
 	if (typeof req.query.difficulties === 'string') {
-		preFormatReq.difficulties = [...req.query.difficulties.split(/,\s?/).map((diff) => parseInt(diff))];
+		preFormatReq.difficulties = [...req.query.difficulties.split(/,\s?/).map((diff) => parseInt(diff))] as Difficulty[];
 	} else {
 		res.status(400).json('Difficulty must be single value');
 		return;

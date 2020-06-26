@@ -1,14 +1,14 @@
 import { toWords } from 'number-to-words';
 import qs from 'qs';
 import { compareTwoStrings } from 'string-similarity';
-import { CardRequestConfig, Category, Difficulty, IProtoCard, QuestionRequestConfig, Subcategory } from 'types';
+import { CardRequestConfig, Category, IProtoCard, QuestionRequestConfig, Subcategory } from 'types';
 import { categories, subcategories } from './constants';
 
 export function compileQuestionRequest(options: QuestionRequestConfig): string {
 	if (options.internal) {
 		const req = '/api/questions?';
 
-		let categories = '&categories=';
+		let categories = 'categories=';
 		categories += options.categories.join(',');
 
 		let subcategories = '&subcategories=';
@@ -19,6 +19,7 @@ export function compileQuestionRequest(options: QuestionRequestConfig): string {
 
 		return req + categories + subcategories + difficulties + `&limit=${options.limit}`;
 	} else {
+		console.log(options);
 		const queryString = qs.stringify(
 			{
 				search: {
@@ -26,7 +27,7 @@ export function compileQuestionRequest(options: QuestionRequestConfig): string {
 					filters: {
 						category: options.categories.map((category) => categories[category].id),
 						subcategory: options.subcategories.map((subcategory) => subcategories[subcategory].id),
-						difficulty: options.difficulties.map((difficulty) => difficultyMap[difficulty as Difficulty])
+						difficulty: options.difficulties.map((difficulty) => difficultyMap[difficulty])
 					},
 					limit: true,
 					random: options.limit
