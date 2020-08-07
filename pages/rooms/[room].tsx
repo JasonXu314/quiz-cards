@@ -382,7 +382,7 @@ const Room: NextPage<RoomInitialProps> = ({ isOwner, room, thisUser }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<RoomInitialProps | { redirect: boolean }, { room: string }> = async ({ req, res, params }) => {
-	axios.post(process.env.NEXT_PUBLIC_BACKEND_URL! + '/wakeup');
+	axios.post(process.env.NEXT_PUBLIC_BACKEND_URL! + 'wakeup');
 	const cookies = parseCookies(req);
 	const settings: Settings | null = cookies.settings ? JSON.parse(cookies.settings) : null;
 	const mpSettings: IClientSettings | null = cookies.mpSettings ? JSON.parse(cookies.mpSettings) : null;
