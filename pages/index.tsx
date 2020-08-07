@@ -4,7 +4,7 @@ import DifficultySelection from '$/DifficultySelection/DifficultySelection';
 import LimitSelector from '$/LimitSelector';
 import ModeSelection from '$/ModeSelection';
 import QuestionReader from '$/QuestionReader/QuestionReader';
-import SpeedSelector from '$/SpeedSelector';
+import SpeedSelector from '$/SpeedSelector/SpeedSelector';
 import SubcategorySelection from '$/SubcategorySelection/SubcategorySelection';
 import Timer from '$/Timer';
 import UIModeSelector from '$/UIModeSelector/UIModeSelector';
@@ -18,22 +18,6 @@ import { GetServerSideProps, NextPage } from 'next/types';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import useSWR from 'swr';
-import {
-	AppMode,
-	CardResponse,
-	Category,
-	CreateUserResponse,
-	Difficulty,
-	ICard,
-	LeaderboardResponse,
-	QuestionReaderMethods,
-	QuestionResponse,
-	Settings,
-	SettingsAction,
-	Subcategory,
-	TossupQuestion,
-	UIMode
-} from 'types';
 import styles from '../sass/Index.module.scss';
 
 const settingsReducer: React.Reducer<Settings, SettingsAction> = (settings, action) => {
@@ -79,9 +63,9 @@ const settingsReducer: React.Reducer<Settings, SettingsAction> = (settings, acti
 			if (settings.user) {
 				return action.user === null
 					? { ...settings, user: null }
-					: { ...settings, user: { _id: action.user._id || settings.user._id, name: action.user.name || settings.user.name } };
+					: { ...settings, user: { id: action.user.id || settings.user.id, name: action.user.name || settings.user.name } };
 			} else {
-				return { ...settings, user: { _id: action.user!._id!, name: action.user!.name! } };
+				return { ...settings, user: { id: action.user!.id!, name: action.user!.name! } };
 			}
 		default:
 			return settings;
@@ -101,7 +85,6 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 	const [allowQuery, setAllowQuery] = useState<boolean>(true);
 	const [timerActive, setTimerActive] = useState<boolean>(false);
 	const [time, setTime] = useState<number>(0);
-	const [correct, setCorrect] = useState<boolean>(false);
 	const [answering, setAnswering] = useRecoilState(answeringState);
 	const [eagerName, setEagerName] = useState<string>(initialSettings?.user?.name || '');
 	const readerRef = useRef<QuestionReaderMethods>(null);
@@ -161,7 +144,7 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 				setCards([]);
 				setError('');
 				axios
-					.get<CardResponse>(
+					.get<ICardIndexResponse>(
 						compileCardRequest('/api/cards', {
 							categories: settings.categories,
 							subcategories: settings.subcategories,
@@ -192,6 +175,7 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 
 	const mainTimeout = useCallback(() => {
 		setAllowQuery(true);
+		readerRef.current?.endQuestion();
 	}, []);
 
 	const keypressHandler = useCallback(
@@ -273,7 +257,7 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 					{settings.mode === 'read' && (
 						<SpeedSelector
 							onChange={(evt) => {
-								if (/-?(\d*|\d*\.\d*|\.\d*)([eE][-+]?\d*)?/.test(evt.target.value)) {
+								if (/(\d*|\d*\.\d*|\.\d*)([eE][-+]?\d*)?/.test(evt.target.value)) {
 									dispatch({ type: 'SET_SPEED', speed: evt.target.value === '' ? NaN : parseInt(evt.target.value) });
 								}
 							}}
@@ -304,9 +288,9 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 							onChange={(evt) => setEagerName(evt.target.value)}
 							onBlur={(evt) => {
 								if (leaderboardData?.leaderboard.map((user) => user.name).includes(evt.target.value)) {
-									const { _id, name } = leaderboardData.leaderboard.find((user) => user.name === evt.target.value)!;
+									const { id, name } = leaderboardData.leaderboard.find((user) => user.name === evt.target.value)!;
 
-									dispatch({ type: 'SET_USER', user: { _id, name } });
+									dispatch({ type: 'SET_USER', user: { id, name } });
 								} else if (!settings.user && evt.target.value !== '') {
 									axios
 										.post<CreateUserResponse>('/api/gateway/user', {
@@ -317,7 +301,7 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 										});
 								} else if (evt.target.value !== '') {
 									axios.patch('/api/gateway/user', {
-										_id: settings.user!._id,
+										_id: settings.user!.id,
 										name: evt.target.value
 									});
 								} else {
@@ -351,7 +335,7 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 						<div className={styles.entry}>Error loading leaderboard...</div>
 					) : leaderboardData ? (
 						leaderboardData.leaderboard.map((user) => (
-							<div key={user._id} className={styles.entry}>
+							<div key={user.id} className={styles.entry}>
 								<h4>{user.name}</h4> {user.score}
 							</div>
 						))
@@ -370,12 +354,10 @@ const Index: NextPage<IndexInitialProps> = ({ settings: initialSettings }) => {
 							setMsg,
 							request,
 							setTime,
-							correct,
-							setCorrect,
 							setTimerActive
 						}}
 						ui_mode={settings.ui_mode}
-						userId={settings.user?._id}
+						userId={settings.user?.id}
 						speed={settings.speed}
 						ref={readerRef}
 					/>

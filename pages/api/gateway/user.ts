@@ -1,6 +1,6 @@
-import { MongoClient, ObjectId } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { DBUser } from 'types';
+import { v4 as uuid } from 'uuid';
 
 export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
 	const dbURL =
@@ -16,7 +16,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 					const db = client.db('cards');
 
 					const { name } = req.body;
-					const createdUser = await db.collection<DBUser>('leaderboard').insertOne({ name, score: 0, _id: ObjectId.createFromTime(Date.now()) });
+					const createdUser = await db.collection<IUser>('leaderboard').insertOne({ name, id: uuid(), score: 0 });
 
 					res.status(201).json({ user: createdUser.ops[0] });
 					client.close();
@@ -30,8 +30,8 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 					const client = await MongoClient.connect(dbURL, { useUnifiedTopology: true });
 					const db = client.db('cards');
 
-					const { name, _id } = req.body;
-					await db.collection<DBUser>('leaderboard').updateOne({ _id: new ObjectId(_id) }, { $set: { name: name } });
+					const { name, id } = req.body;
+					await db.collection<IUser>('leaderboard').updateOne({ id }, { $set: { name: name } });
 
 					res.status(200).send('Name updated!');
 				} catch (err) {

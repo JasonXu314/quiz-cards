@@ -1,6 +1,5 @@
 import { categories } from '@/constants';
 import { memo, useState } from 'react';
-import { Category, ImportCardReducerAction, IProtoCard, Subcategory } from 'types';
 import styles from './ImportCard.module.scss';
 
 interface Props {
@@ -27,7 +26,7 @@ const ImportCard: React.FC<Props> = memo(
 						setCategory(newCategory);
 						dispatch({ type: 'CATEGORY', i: index, category: newCategory });
 					}}>
-					{Object.entries(categories).map(([categoryName, category]) => (
+					{categories.entries.map(([categoryName, category]) => (
 						<option key={category.id} value={categoryName}>
 							{categoryName}
 						</option>

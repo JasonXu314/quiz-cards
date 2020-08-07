@@ -15,6 +15,7 @@
 	},
 	"plugins": ["react", "@typescript-eslint", "react-hooks"],
 	"rules": {
+		"@typescript-eslint/explicit-module-boundary-types": "off",
 		"@typescript-eslint/no-non-null-assertion": "off",
 		"@typescript-eslint/no-empty-interface": "warn",
 		"@typescript-eslint/no-inferrable-types": "off",

@@ -1,5 +1,4 @@
 import { atom } from 'recoil';
-import { UsedQuestion } from 'types';
 
 export const answeringState = atom({
 	key: 'answering',
@@ -21,7 +20,12 @@ export const readingStartState = atom({
 	default: false
 });
 
-export const activeState = atom({
-	key: 'active',
+export const someAnsweringState = atom({
+	key: 'someAnswering',
 	default: false
+});
+
+export const roomPrevQuestionsState = atom<UsedQuestion[]>({
+	key: 'roomPrevQuestions',
+	default: []
 });

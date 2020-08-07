@@ -1,6 +1,6 @@
 .main {
 	display: grid;
-	grid-template: 'title sidebar' max-content 'questions sidebar' auto 'questions sidebar' auto / 12fr 2fr;
+	grid-template: 'title .' max-content 'questions sidebar' auto 'questions sidebar' auto / 12fr 2fr;
 
 	.title {
 		grid-area: title;
@@ -10,38 +10,21 @@
 
 	.sidebar {
 		grid-area: sidebar;
-		padding: 0.2em 0.3em;
+		padding: 0.5em 0.75em;
 
 		h3 {
 			text-align: center;
 		}
 
-		.settings {
-			hr {
-				margin-top: 0.3em;
-				margin-bottom: 0.3em;
-			}
-
-			.distro {
-				.category {
-					display: grid;
-					grid-template-columns: 1fr 1fr;
-
-					.percentageWrapper {
-						padding: 0 2em;
-						cursor: pointer;
-
-						.percentage {
-							display: inline;
-						}
-					}
-				}
-			}
+		form hr {
+			margin-top: 0.3em;
+			margin-bottom: 0.3em;
 		}
 	}
 
 	.content {
 		grid-area: questions;
+		padding: 0.2em 0.5em;
 
 		.msg {
 			padding: 0.2em 0.5em;
@@ -70,18 +53,4 @@
 			}
 		}
 	}
-
-	&.blur {
-		filter: blur(3px);
-	}
-}
-
-.overlay {
-	height: 100%;
-	width: 100%;
-	position: absolute;
-	top: 0;
-	left: 0;
-	background: rgba(0, 0, 0, 0.15);
-	z-index: 2;
 }

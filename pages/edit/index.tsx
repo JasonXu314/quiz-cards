@@ -5,7 +5,6 @@ import { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useState } from 'react';
-import { CardResponse, Category, ICard, Subcategory } from 'types';
 import styles from '../../sass/EditIndex.module.scss';
 
 const Index: NextPage = () => {
@@ -28,7 +27,7 @@ const Index: NextPage = () => {
 					}}
 					value={category}>
 					<option value=""></option>
-					{Object.entries(categories).map(([categoryName, category]) => (
+					{categories.entries.map(([categoryName, category]) => (
 						<option key={category.id} value={categoryName}>
 							{categoryName}
 						</option>
@@ -52,7 +51,7 @@ const Index: NextPage = () => {
 					<button
 						onClick={() => {
 							axios
-								.get<CardResponse>(
+								.get<ICardIndexResponse>(
 									compileCardRequest('/api/cards', {
 										categories: [category],
 										subcategories: [subcategory]
@@ -79,7 +78,7 @@ const Index: NextPage = () => {
 					</button>
 				</div>
 				{cards.slice(page * 50, (page + 1) * 50).map((card) => (
-					<Link href="/edit/[_id]" as={`/edit/${card._id}`} key={card._id}>
+					<Link href="/edit/[_id]" as={`/edit/${card.id}`} key={card.id}>
 						<a>
 							<div className={styles.card}>
 								<h3 className={styles.hint}>{card.hint}</h3>

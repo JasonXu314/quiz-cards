@@ -4,7 +4,6 @@ import axios from 'axios';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import { useState } from 'react';
-import { Category, Subcategory } from 'types';
 import styles from '../sass/Create.module.scss';
 
 const Create: NextPage = () => {
@@ -30,7 +29,7 @@ const Create: NextPage = () => {
 						setSubcategory(null);
 					}}
 					value={category}>
-					{Object.entries(categories).map(([categoryName, category]) => (
+					{categories.entries.map(([categoryName, category]) => (
 						<option key={category.id} value={categoryName}>
 							{categoryName}
 						</option>

@@ -1,18 +1,14 @@
 import { MongoClient } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { IProtoCard } from 'types';
+import { v4 as uuid } from 'uuid';
 
 export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
-	const dbURL =
-		process.env.NODE_ENV === 'development'
-			? 'mongodb://localhost:27017'
-			: `mongodb+srv://Me:${process.env.MONGODB_PASSWORD}@quiz-cards-cluster-hwc6f.mongodb.net/test?retryWrites=true&w=majority`;
-
 	try {
-		const client = await MongoClient.connect(dbURL, { useUnifiedTopology: true });
+		const client = await MongoClient.connect(process.env.MONGODB_URL!, { useUnifiedTopology: true });
 
 		switch (req.method) {
 			case 'GET':
+				res.setHeader('Location', '/cards');
 				res.status(301).send('This is just a endpoint for importing anki decks. To get the cards, simply request /cards instead');
 				break;
 			case 'POST':
@@ -20,7 +16,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 					const cards: IProtoCard[] = req.body.cards;
 					const db = client.db('cards');
 
-					await db.collection('cards').insertMany(cards.map((card) => ({ ...card, subcategory: card.subcategory })));
+					await db.collection<ICard>('cards').insertMany(cards.map((card) => ({ ...card, id: uuid() })));
 					res.status(200).send('Cards Imported!');
 				} catch (err) {
 					console.log(err);

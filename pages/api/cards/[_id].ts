@@ -1,24 +1,20 @@
-import { MongoClient, ObjectID } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
-	const dbURL =
-		process.env.NODE_ENV === 'development'
-			? 'mongodb://localhost:27017'
-			: `mongodb+srv://Me:${process.env.MONGODB_PASSWORD}@quiz-cards-cluster-hwc6f.mongodb.net/test?retryWrites=true&w=majority`;
-
+export default async (req: NextApiRequest, res: NextApiResponse<ISingleCardResponse | string>): Promise<void> => {
 	try {
-		const client = await MongoClient.connect(dbURL, { useUnifiedTopology: true });
+		const client = await MongoClient.connect(process.env.MONGODB_URL!, { useUnifiedTopology: true });
 		const db = client.db('cards');
 
-		const { _id } = req.query;
+		const { id } = (req.query as unknown) as ICardQuery;
 
-		const card = await db
-			.collection('cards')
-			.find({ _id: new ObjectID(_id as string) })
-			.next();
+		const card = await db.collection<ICard>('cards').findOne({ id });
 
-		res.status(200).json(card);
+		if (!card) {
+			res.status(404).send('Card Not Found');
+		} else {
+			res.status(200).json({ card });
+		}
 
 		client.close();
 	} catch (err) {

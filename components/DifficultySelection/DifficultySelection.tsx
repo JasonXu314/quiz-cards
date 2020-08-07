@@ -1,5 +1,4 @@
 import { difNumToString, difNumToTags } from '@/constants';
-import { Difficulty } from 'types';
 import styles from './DifficultySelection.module.scss';
 
 interface Props {

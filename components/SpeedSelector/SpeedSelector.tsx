@@ -1,4 +1,4 @@
-import styles from '../sass/SpeedSelector.module.scss';
+import styles from './SpeedSelector.module.scss';
 
 interface Props {
 	onChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;

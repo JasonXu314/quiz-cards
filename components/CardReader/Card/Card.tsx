@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { ICard } from 'types';
 import styles from './Card.module.scss';
 
 interface Props {
@@ -16,7 +15,7 @@ const Card: React.FC<Props> = ({ card, setFlipped, flipped }) => {
 				{card.category}
 				<h3>Subcategory:</h3>
 				{card.subcategory || 'N/A'}
-				<Link href="/edit/[_id]" as={`/edit/${card._id}`}>
+				<Link href="/edit/[_id]" as={`/edit/${card.id}`}>
 					<a rel="noopener noreferrer" target="_blank">
 						Edit this card
 					</a>

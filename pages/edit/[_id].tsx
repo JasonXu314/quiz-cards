@@ -5,7 +5,6 @@ import { NextPage } from 'next';
 import Head from 'next/head';
 import Router from 'next/router';
 import { useEffect, useState } from 'react';
-import { Category, ICard, Subcategory } from 'types';
 import styles from '../../sass/Edit_id.module.scss';
 
 const Page: NextPage = () => {
@@ -29,10 +28,10 @@ const Page: NextPage = () => {
 			) : (
 				<div className={styles.card}>
 					<Head>
-						<title>QuizCards - Editing {card._id}</title>
+						<title>QuizCards - Editing {card.id}</title>
 					</Head>
 					<div className={styles.id}>
-						Editing: {card._id} by {card.author || 'N/A'}
+						Editing: {card.id} by {card.author || 'N/A'}
 					</div>
 					<div className={styles.form}>
 						<textarea cols={60} rows={5} value={card.hint} onChange={(evt) => setCard({ ...card, hint: evt.target.value })} />
@@ -46,7 +45,7 @@ const Page: NextPage = () => {
 								setCard({ ...card, category: evt.target.value as Category, subcategory: null });
 							}}
 							value={card.category}>
-							{Object.entries(categories).map(([categoryName, category]) => (
+							{categories.entries.map(([categoryName, category]) => (
 								<option key={category.id} value={categoryName}>
 									{categoryName}
 								</option>
@@ -86,7 +85,7 @@ const Page: NextPage = () => {
 									axios
 										.delete('/api/cards', {
 											data: {
-												_id: card._id
+												id: card.id
 											}
 										})
 										.then(() => {

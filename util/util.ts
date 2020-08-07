@@ -1,9 +1,9 @@
 import cookie from 'cookie';
-import { IncomingMessage } from 'http';
+import { IncomingMessage, ServerResponse } from 'http';
+import { GetServerSidePropsResult } from 'next';
 import { toWords } from 'number-to-words';
 import qs from 'qs';
 import { compareTwoStrings } from 'string-similarity';
-import { CardRequestConfig, Category, Difficulty, IProtoCard, QuestionRequestConfig, Subcategory } from 'types';
 import { categories, subcategories } from './constants';
 
 export function compileQuestionRequest(options: QuestionRequestConfig): string {
@@ -182,6 +182,51 @@ export function parseCookies(req: IncomingMessage): Record<string, string> {
 	return cookie.parse(req.headers.cookie || '');
 }
 
+export function redirect(res: ServerResponse, dest: string): GetServerSidePropsResult<{ redirect: true }> {
+	res.writeHead(302, {
+		Location: dest
+	}).end();
+	return {
+		props: {
+			redirect: true
+		}
+	};
+}
+
+export function capitalize(arr: string[]): string[] {
+	return arr.map((word) => word.slice(0, 1).toLocaleUpperCase() + word.slice(1));
+}
+
+export function generateCategoryFromDistro(distro: Record<Category, number>): Category {
+	const rand = Math.random() * 100;
+	const litMin = 0;
+	const sciMin = litMin + distro.Literature;
+	const histMin = sciMin + distro.Science;
+	const faMin = histMin + distro.History;
+	const mythMin = faMin + distro['Fine Arts'];
+	const relMin = mythMin + distro.Mythology;
+	const geoMin = relMin + distro.Religion;
+	const phiMin = geoMin + distro.Geography;
+	const ceMin = phiMin + distro.Philosophy;
+	const ssMin = ceMin + distro['Current Events'];
+	const trashMin = ssMin + distro['Social Science'];
+	let category: Category = 'Literature';
+
+	if (rand > litMin) category = 'Literature';
+	if (rand > sciMin) category = 'Science';
+	if (rand > histMin) category = 'History';
+	if (rand > faMin) category = 'Fine Arts';
+	if (rand > mythMin) category = 'Mythology';
+	if (rand > relMin) category = 'Religion';
+	if (rand > geoMin) category = 'Geography';
+	if (rand > phiMin) category = 'Philosophy';
+	if (rand > ceMin) category = 'Current Events';
+	if (rand > ssMin) category = 'Social Science';
+	if (rand > trashMin) category = 'Trash';
+
+	return category;
+}
+
 const difficultyMap = {
 	1: 'middle_school',
 	2: 'easy_high_school',
@@ -192,4 +237,18 @@ const difficultyMap = {
 	7: 'regular_college',
 	8: 'hard_college',
 	9: 'open'
+} as const;
+
+export const defaultDistro = {
+	'Current Events': 2.5,
+	'Fine Arts': 15,
+	Geography: 5,
+	History: 20,
+	Literature: 20,
+	Mythology: 5,
+	Philosophy: 2.5,
+	Religion: 2.5,
+	Science: 20,
+	'Social Science': 5,
+	Trash: 2.5
 } as const;

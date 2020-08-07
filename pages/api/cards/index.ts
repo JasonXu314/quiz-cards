@@ -1,35 +1,12 @@
 import { MongoClient, ObjectID } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { CardResponse, Category, ICard, Subcategory } from 'types';
+import { v4 as uuid } from 'uuid';
 
-export default async (req: NextApiRequest, res: NextApiResponse<CardResponse | string>): Promise<void> => {
-	const dbURL =
-		process.env.NODE_ENV === 'development'
-			? 'mongodb://localhost:27017'
-			: `mongodb+srv://Me:${process.env.MONGODB_PASSWORD}@quiz-cards-cluster-hwc6f.mongodb.net/test?retryWrites=true&w=majority`;
-
+export default async (req: NextApiRequest, res: NextApiResponse<ICardIndexResponse | string>): Promise<void> => {
 	try {
-		const client = await MongoClient.connect(dbURL, { useUnifiedTopology: true });
+		const client = await MongoClient.connect(process.env.MONGODB_URL!, { useUnifiedTopology: true });
 
 		switch (req.method) {
-			case 'POST':
-				try {
-					const { category, subcategory, hint, answer, author } = req.body;
-					const db = client.db('cards');
-
-					await db.collection('cards').insertOne({
-						category,
-						hint,
-						answer,
-						author: author === '' ? null : author,
-						subcategory: subcategory === '' ? null : subcategory
-					});
-					res.status(200).send('Card Created!');
-				} catch (err) {
-					console.log(err);
-					res.status(500).send('Server Error: DB Failed to push');
-				}
-				break;
 			case 'GET':
 				try {
 					if (!req.query.categories) {
@@ -89,6 +66,25 @@ export default async (req: NextApiRequest, res: NextApiResponse<CardResponse | s
 					res.status(500).send('DB Failed to Connect');
 				}
 				break;
+			case 'POST':
+				try {
+					const { category, subcategory, hint, answer, author } = req.body;
+					const db = client.db('cards');
+
+					await db.collection<ICard>('cards').insertOne({
+						category,
+						hint,
+						answer,
+						id: uuid(),
+						author: author === '' ? null : author,
+						subcategory: subcategory === '' ? null : subcategory
+					});
+					res.status(200).send('Card Created!');
+				} catch (err) {
+					console.log(err);
+					res.status(500).send('Server Error: DB Failed to push');
+				}
+				break;
 			case 'PUT':
 				try {
 					const { card } = req.body;
@@ -103,10 +99,10 @@ export default async (req: NextApiRequest, res: NextApiResponse<CardResponse | s
 				break;
 			case 'DELETE':
 				try {
-					const { _id } = req.body;
+					const { id } = req.body;
 					const db = client.db('cards');
 
-					await db.collection('cards').findOneAndDelete({ _id: new ObjectID(_id) });
+					await db.collection<ICard>('cards').findOneAndDelete({ id });
 					res.status(200).send('Card Deleted!');
 				} catch (err) {
 					console.log(err);

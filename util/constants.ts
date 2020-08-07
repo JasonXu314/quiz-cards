@@ -1,5 +1,3 @@
-import { Category, ICategory, ISubcategory, Subcategory } from 'types';
-
 export const difNumToString = {
 		1: '1 (Middle School)',
 		2: '2 (Easy High School)',

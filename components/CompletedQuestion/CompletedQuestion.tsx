@@ -1,7 +1,6 @@
 import BuzzIcon from '$/BuzzIcon';
 import PowerStar from '$/PowerStar/PowerStar';
 import { useState } from 'react';
-import { TossupQuestion, UIMode } from 'types';
 import styles from './CompletedQuestion.module.scss';
 
 interface Props {

@@ -2,7 +2,6 @@ import ChevronDown from '$/ChevronDown/ChevronDown';
 import ChevronUp from '$/ChevronUp/ChevronUp';
 import { categories as cats } from '@/constants';
 import { useEffect, useReducer } from 'react';
-import { Category } from 'types';
 
 interface Props {
 	onChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;

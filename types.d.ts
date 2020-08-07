@@ -1,5 +1,3 @@
-import { ObjectId } from 'mongodb';
-
 interface TossupQuestion {
 	id: number;
 	text: string;
@@ -72,8 +70,6 @@ interface BonusQuestion {
 		quality: string;
 		type: null;
 		link: string;
-		type: string | null;
-		link: string;
 		created_at: string;
 		updated_at: string;
 		difficulty: string;
@@ -107,7 +103,15 @@ interface QuizDBResponse {
 	};
 }
 
-interface CardResponse {
+interface ICardQuery {
+	id: string;
+}
+
+interface ISingleCardResponse {
+	card: ICard;
+}
+
+interface ICardIndexResponse {
 	cards: ICard[];
 	num_cards_found: number;
 }
@@ -118,7 +122,19 @@ interface QuestionResponse {
 }
 
 interface LeaderboardResponse {
-	leaderboard: User[];
+	leaderboard: IUser[];
+}
+
+interface IRoomIndexResponse {
+	rooms: IRoom[];
+}
+
+interface ISingleRoomResponse {
+	room: IRoom;
+}
+
+interface ICreateRoomResponse {
+	room: IRoom;
 }
 
 interface UsedQuestion {
@@ -134,7 +150,7 @@ interface ICard {
 	answer: string;
 	subcategory: Subcategory | null;
 	category: Category;
-	_id: string;
+	id: string;
 	author: string | null;
 }
 
@@ -146,26 +162,15 @@ interface IProtoCard {
 	author: string | null;
 }
 
-interface User {
+interface IUser {
 	name: string;
 	score: number;
-	_id: string;
+	id: string;
 }
 
 interface UserWithoutScore {
 	name: string;
-	_id: string;
-}
-
-interface PartialUser {
-	name?: string;
-	_id?: string;
-}
-
-interface DBUser {
-	name: string;
-	score: number;
-	_id: ObjectId;
+	id: string;
 }
 
 interface QuestionRequestConfig {
@@ -289,6 +294,11 @@ interface Settings {
 	user: UserWithoutScore | null;
 }
 
+interface IClientSettings {
+	uiMode: UIMode;
+	user: UserWithoutScore | null;
+}
+
 interface RoomSettings {
 	distro: Record<Category, number>;
 	difficulties: Difficulty[];
@@ -305,9 +315,12 @@ type SettingsAction =
 	| { type: 'SET_SPEED'; speed: number }
 	| { type: 'SET_USE_LIMIT'; useLimit: boolean }
 	| { type: 'SET_UI_MODE'; mode: UIMode }
-	| { type: 'SET_USER'; user: PartialUser | null };
+	| { type: 'SET_USER'; user: Partial<IUser> | null };
 
-type RoomSettingsAction = { type: 'TOGGLE_DIFFICULTY'; difficulty: Difficulty } | { type: 'SET_SPEED'; speed: number };
+type RoomSettingsAction =
+	| { type: 'TOGGLE_DIFFICULTY'; difficulty: Difficulty }
+	| { type: 'SET_SPEED'; speed: number }
+	| { type: 'SET_DISTRO'; distro: Record<Category, number> };
 
 interface CreateUserPost {
 	name: string;
@@ -318,16 +331,19 @@ interface CreateUserResponse {
 }
 
 interface ScorePost {
-	_id: number;
+	id: string;
 	type: 'TEN' | 'NEG' | 'POWER';
 }
 
-interface IRoom<T extends 'server' | 'client'> {
-	_id: T extends 'server' ? ObjectId : string;
+interface IRoom {
+	id: string;
 	name: string;
-	ownerId: T extends 'server' ? ObjectId : string;
-	users: UserWithoutScore[];
+	ownerId: string;
 	settings: RoomSettings;
+	users: UserWithoutScore[];
+	answeringUserId: string | null;
+	currentQuestion: TossupQuestion | null;
+	startTime: number | null;
 }
 
 interface ICategory {
@@ -344,4 +360,40 @@ interface ISubcategory {
 interface ScoreChangeEvent {
 	userId: string;
 	score: number;
+}
+
+interface NameChangeEvent {
+	userId: string;
+	name: string;
+}
+
+interface ILeaderboard {
+	roomId: string;
+	leaderboard: IUser[];
+}
+
+interface NewRoomEvent {
+	room: IRoom;
+}
+
+interface IBuzzEvent {
+	userId: string;
+	idx: number;
+}
+
+interface IScoreEvent {
+	userId: string;
+	increment: number;
+}
+
+interface IDistroChangeEvent {
+	newDistro: Record<Category, number>;
+}
+
+interface IQuestionAdvanceEvent {
+	question: TossupQuestion;
+}
+
+interface IQuestionEndEvent {
+	answer: string;
 }

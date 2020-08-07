@@ -1,14 +1,13 @@
-import { activeState, answeringState, questionIndexState, readingStartState, usedQuestionsState } from '@/atoms';
+import { answeringState, questionIndexState, readingStartState, usedQuestionsState } from '@/atoms';
 import { checkAns } from '@/util';
 import axios from 'axios';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { QuestionReaderMethods, TossupQuestion, UIMode } from 'types';
+import AnswerBox from '../AnswerBox/AnswerBox';
 import Bell from '../Bell/Bell';
+import CompletedQuestion from '../CompletedQuestion/CompletedQuestion';
+import Question from '../Question/Question';
 import StyledButton from '../StyledButton/StyledButton';
-import AnswerBox from './AnswerBox/AnswerBox';
-import CompletedQuestion from './CompletedQuestion/CompletedQuestion';
-import Question from './Question/Question';
 import styles from './QuestionReader.module.scss';
 
 interface Props {
@@ -17,8 +16,6 @@ interface Props {
 	setAllowQuery: React.Dispatch<React.SetStateAction<boolean>>;
 	setMsg: React.Dispatch<React.SetStateAction<string | null>>;
 	setTime: React.Dispatch<React.SetStateAction<number>>;
-	correct: boolean;
-	setCorrect: React.Dispatch<React.SetStateAction<boolean>>;
 	setTimerActive: React.Dispatch<React.SetStateAction<boolean>>;
 	request: () => void;
 	ui_mode: UIMode;
@@ -26,19 +23,20 @@ interface Props {
 }
 
 const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Props> = (
-	{ questions, speed, setAllowQuery, setMsg, request, setTime, correct, setCorrect, setTimerActive, ui_mode, userId },
+	{ questions, speed, setAllowQuery, setMsg, request, setTime, setTimerActive, ui_mode, userId },
 	ref
 ) => {
 	const [questionTokens, setQuestionTokens] = useState<string[]>([]);
 	const [idx, setIdx] = useState<number>(0);
 	const powerIndex = questionTokens.indexOf('(*)');
 	const [usedQuestions, setUsedQuestions] = useRecoilState(usedQuestionsState);
-	const [active, setActive] = useRecoilState(activeState);
+	const [active, setActive] = useState<boolean>(false);
 	const [questionFinished, setQuestionFinished] = useState<boolean>(false);
 	const [answering, setAnswering] = useRecoilState(answeringState);
 	const [userAnswer, setUserAnswer] = useState<string>('');
 	const [questionIndex, setQuestionIndex] = useRecoilState(questionIndexState);
 	const [readingStart, setReadingStart] = useRecoilState(readingStartState);
+	const [correct, setCorrect] = useState<boolean>(false);
 
 	useImperativeHandle(
 		ref,
@@ -48,23 +46,23 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 				setQuestionFinished(true);
 				setAllowQuery(true);
 
-				const correct = checkAns(userAnswer, questions[questionIndex].answer);
-				setCorrect(correct);
-				if (correct && userId) {
+				const ansCorrect = checkAns(userAnswer, questions[questionIndex].answer);
+				setCorrect(ansCorrect);
+				if (ansCorrect && userId) {
 					if (powerIndex > idx) {
 						axios.post('/api/gateway', {
-							_id: userId,
+							id: userId,
 							type: 'POWER'
 						});
 					} else {
 						axios.post('/api/gateway', {
-							_id: userId,
+							id: userId,
 							type: 'TEN'
 						});
 					}
 				} else if (!questionFinished) {
 					axios.post('/api/gateway', {
-						_id: userId,
+						id: userId,
 						type: 'NEG'
 					});
 				}
@@ -82,7 +80,20 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 			}
 		}),
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[idx, powerIndex, questionFinished, questionIndex, questions, userAnswer, setActive, setAnswering, setQuestionIndex, setUserAnswer, setUsedQuestions]
+		[
+			idx,
+			powerIndex,
+			questionFinished,
+			questionIndex,
+			userId,
+			questions,
+			userAnswer,
+			setActive,
+			setAnswering,
+			setQuestionIndex,
+			setUserAnswer,
+			setUsedQuestions
+		]
 	);
 
 	const keypressHandler = useCallback(
@@ -153,17 +164,19 @@ const QuestionReader: React.ForwardRefRenderFunction<QuestionReaderMethods, Prop
 	useEffect(() => {
 		const intervalID = setInterval(() => {
 			if (active) {
-				setIdx(idx + 1);
-				if (idx === questionTokens.length) {
-					clearInterval(intervalID);
-				}
+				setIdx((idx) => {
+					if (idx === questionTokens.length) {
+						clearInterval(intervalID);
+					}
+					return idx + 1;
+				});
 			}
 		}, speed);
 
 		return () => {
 			clearInterval(intervalID);
 		};
-	}, [speed, active, idx, questionTokens]);
+	}, [speed, active, questionTokens]);
 
 	useEffect(() => {
 		document.addEventListener('keyup', keypressHandler);

@@ -1,4 +1,3 @@
-import { AppMode } from 'types';
 import styles from '../sass/LimitSelector.module.scss';
 
 interface Props {

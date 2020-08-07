@@ -7,7 +7,6 @@ import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useReducer, useState } from 'react';
-import { Category, ImportCardReducerAction, IProtoCard, Subcategory } from 'types';
 import styles from '../sass/Import.module.scss';
 
 const reducer: React.Reducer<IProtoCard[], ImportCardReducerAction> = (cards, action) => {
@@ -52,7 +51,7 @@ const Import: NextPage<{ url: string }> = ({ url }) => {
 								setSubcategory(null);
 							}}
 							value={category}>
-							{Object.entries(categories).map(([categoryName, thisCategory]) => (
+							{categories.entries.map(([categoryName, thisCategory]) => (
 								<option key={thisCategory.id} value={categoryName}>
 									{categoryName}
 								</option>

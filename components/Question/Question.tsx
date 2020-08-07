@@ -1,5 +1,4 @@
 import PowerStar from '$/PowerStar/PowerStar';
-import { TossupQuestion, UIMode } from 'types';
 import styles from './Question.module.scss';
 
 interface Props {

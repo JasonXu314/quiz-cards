@@ -1,6 +1,5 @@
-import { MongoClient, ObjectId } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { DBUser, ScorePost } from 'types';
 
 export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
 	const dbURL =
@@ -14,26 +13,12 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 		switch (req.method) {
 			case 'POST':
 				try {
-					const { _id, type } = req.body as ScorePost;
+					const { id, type } = req.body as ScorePost;
 					const db = client.db('cards');
+					const $inc = { score: type === 'NEG' ? -5 : type === 'POWER' ? 15 : 10 };
 
-					switch (type) {
-						case 'POWER':
-							await db.collection<DBUser>('leaderboard').updateOne({ _id: new ObjectId(_id) }, { $inc: { score: 15 } });
-							res.status(200).end();
-							break;
-						case 'NEG':
-							await db.collection<DBUser>('leaderboard').updateOne({ _id: new ObjectId(_id) }, { $inc: { score: -5 } });
-							res.status(200).end();
-							break;
-						case 'TEN':
-							await db.collection<DBUser>('leaderboard').updateOne({ _id: new ObjectId(_id) }, { $inc: { score: 10 } });
-							res.status(200).end();
-							break;
-						default:
-							res.status(400).send('Unrecognized point scoring type');
-							break;
-					}
+					await db.collection<IUser>('leaderboard').updateOne({ id }, { $inc });
+					res.status(200).end();
 				} catch (err) {
 					console.log(err);
 					res.status(500).send('Error connecting to DB');
